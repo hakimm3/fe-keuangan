@@ -3,7 +3,8 @@ import axios from 'axios';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-const API_URL = 'http://backend.keuangan.net/api/auth/';
+const API_URL = import.meta.env.VITE_BASE_URL + 'auth/';
+
 export const authStore = defineStore('auth', () => {
     const isValidationError = ref(false);
     const validationErrors = ref([]);

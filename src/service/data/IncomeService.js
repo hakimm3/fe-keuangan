@@ -1,6 +1,6 @@
 import { BaseService } from '../BaseServices';
 
-const API_URL = 'http://backend.keuangan.net/api/incomes';
+const API_URL = import.meta.env.VITE_BASE_URL + 'incomes';
 
 export const IncomeService = {
     getData: async () => {

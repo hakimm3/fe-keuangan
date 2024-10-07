@@ -1,7 +1,7 @@
 import router from '@/router';
 import axios from 'axios';
 
-const API_URL = 'http://backend.keuangan.net/api/dashboard';
+const API_URL = import.meta.env.VITE_BASE_URL + 'dashboard';
 
 export const DashboardService = {
     getDashboardData: async () => {

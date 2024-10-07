@@ -1,6 +1,6 @@
 import { BaseService } from '../BaseServices';
 
-const API_URL = 'http://backend.keuangan.net/api/master-data/income-categories';
+const API_URL = import.meta.env.VITE_BASE_URL + 'master-data/income-categories';
 
 export const IncomeCategoryService = {
     getData: async () => {

@@ -1,6 +1,6 @@
 import { BaseService } from '../BaseServices';
 
-const API_URL = 'http://backend.keuangan.net/api/authorization/users';
+const API_URL = import.meta.env.VITE_BASE_URL + 'authorization/users';
 
 export const UserService = {
     getData: async () => {
