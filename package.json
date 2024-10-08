@@ -1,7 +1,7 @@
 {
     "name": "sakai-vue",
     "version": "4.1.0",
-    "homepage": "https://github.com/hakimm3/fe-keuangan",
+    "homepage": "https://github.com/hakimm3/fe-keuangan/",
     "scripts": {
         "dev": "vite",
         "build": "vite build",

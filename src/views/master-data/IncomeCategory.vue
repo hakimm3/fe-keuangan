@@ -58,7 +58,7 @@ function hideDialog() {
 async function saveIncomeCategory() {
     submitted.value = true;
 
-    if (incomeCategory?.value.description?.trim() && incomeCategory?.value.name) {
+    if (incomeCategory?.value.name) {
         if (incomeCategory.value.id) {
             await IncomeCategoryService.update(incomeCategory.value.id, {
                 name: incomeCategory.value.name,
@@ -214,8 +214,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </div>
                 <div>
                     <label for="description" class="block font-bold mb-3">Description</label>
-                    <InputText id="description" v-model.trim="incomeCategory.description" required="true" autofocus :invalid="submitted && !incomeCategory.description" fluid />
-                    <small v-if="submitted && !incomeCategory.description" class="text-red-500">description is required.</small>
+                    <InputText id="description" v-model.trim="incomeCategory.description" required="true" autofocus fluid />
                 </div>
             </div>
 
