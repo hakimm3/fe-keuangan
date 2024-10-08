@@ -23,7 +23,6 @@ const items = ref([
 onMounted(() => {
     ProductService.getProductsSmall().then((data) => (products.value = data));
     chartOptions.value = setChartOptions();
-    stackedChartData.value = setStackedChartData();
     setExpenseStreamByMonth();
     setIncomeStreamByMonth();
     getDashboardData();
@@ -50,7 +49,8 @@ async function setIncomeStreamByMonth() {
 }
 
 function convertToStackedChartData(data) {
-    const labels = Object.keys(data);
+    const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const labels = Object.keys(data).sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
     const datasets = [];
     const categoryTotals = {};
 
@@ -83,42 +83,6 @@ function generateColor() {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
-}
-
-function setStackedChartData() {
-    return {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        datasets: [
-            {
-                label: 'Makanan Pokok',
-                data: [65, 59, 80, 81, 56, 55, 40],
-                backgroundColor: '#36a2eb',
-                borderColor: 'transparent'
-            },
-            {
-                label: 'Makanan Ringan',
-                data: [28, 48, 40, 19, 86, 27, 90],
-                backgroundColor: '#ff6384',
-                borderColor: 'transparent'
-            },
-            {
-                label: 'Minuman',
-                data: [18, 38, 50, 69, 36, 47, 110],
-                backgroundColor: '#ffce56',
-                borderColor: 'transparent'
-            },
-            {
-                label: 'Peralatan Dapur',
-                data: [48, 68, 70, 79, 96, 77, 100],
-                backgroundColor: '#4bc0c0',
-                borderColor: 'transparent',
-                borderRadius: {
-                    topLeft: 8,
-                    topRight: 8
-                }
-            }
-        ]
-    };
 }
 
 function setChartOptions() {
@@ -160,7 +124,6 @@ const formatCurrency = (value) => {
 };
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
-    stackedChartData.value = setStackedChartData();
     chartOptions.value = setChartOptions();
     dashboardData.value = getDashboardData();
 });
