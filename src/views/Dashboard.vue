@@ -1,12 +1,10 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { DashboardService } from '@/service/dashboard/DashboardService';
-import { ProductService } from '@/service/ProductService';
 import { onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
-const products = ref(null);
 const chartOptions = ref(null);
 const dashboardData = ref(null);
 const expenseStreamByMonth = ref(null);
@@ -20,7 +18,6 @@ const items = ref([
 ]);
 
 onMounted(() => {
-    ProductService.getProductsSmall().then((data) => (products.value = data));
     chartOptions.value = setChartOptions();
     getDashboardData();
 });

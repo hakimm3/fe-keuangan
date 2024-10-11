@@ -25,6 +25,11 @@ const router = createRouter({
                             path: 'incomes', // Path tidak perlu diawali dengan '/'
                             name: 'incomes',
                             component: () => import('@/views/data/Income.vue') // Tambahkan komponen untuk rute ini
+                        },
+                        {
+                            path: 'my-wallets',
+                            name: 'myWallets',
+                            component: () => import('@/views/data/MyWallet.vue')
                         }
                     ]
                 },

@@ -12,7 +12,8 @@ const model = ref([
         label: 'Data',
         items: [
             { label: 'Incomes', icon: 'pi pi-fw pi-money-bill', to: '/data/incomes' },
-            { label: 'Expenses', icon: 'pi pi-fw pi-money-bill', to: '/data/expenses' }
+            { label: 'Expenses', icon: 'pi pi-fw pi-money-bill', to: '/data/expenses' },
+            { label: 'My Wallets', icon: 'pi pi-fw pi-wallet', to: '/data/my-wallets' }
         ]
     },
     {

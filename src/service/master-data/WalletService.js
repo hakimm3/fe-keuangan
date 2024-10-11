@@ -21,9 +21,5 @@ export const WalletServices = {
 
     bulkDelete: async (ids) => {
         return await BaseService.bulkDelete(ids, `${API_URL}/bulk-delete`);
-    },
-
-    import: async (data) => {
-        return await BaseService.import(data, `${API_URL}/import`);
     }
 };
