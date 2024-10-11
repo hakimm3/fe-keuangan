@@ -36,7 +36,7 @@ export const BaseService = {
                 localStorage.removeItem('token');
                 router.push('/login');
             } else if (error.response.status === 422) {
-                return error.response.data;
+                return error.response;
             }
             throw error;
         }
@@ -56,7 +56,7 @@ export const BaseService = {
                 localStorage.removeItem('token');
                 router.push('/login');
             } else if (error.response.status === 422) {
-                return error.response.data;
+                return error.response;
             }
             throw error;
         }

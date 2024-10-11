@@ -55,15 +55,23 @@ function hideDialog() {
     submitted.value = false;
 }
 
+function showToastError(message) {
+    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+}
+
 async function saveExpenseCategory() {
     submitted.value = true;
 
     if (expenseCategory?.value.name) {
         if (expenseCategory.value.id) {
-            await ExpenseCategoryService.update(expenseCategory.value.id, {
+            const response = await ExpenseCategoryService.update(expenseCategory.value.id, {
                 name: expenseCategory.value.name,
                 description: expenseCategory.value.description
             });
+            if (response.status === 200) {
+                showToastError(response.data.message);
+                return;
+            }
             expenseCategories.value[findIndexById(expenseCategory.value.id)] = expenseCategory.value;
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Updated', life: 3000 });
         } else {
@@ -139,7 +147,7 @@ function deleteSelectedExpenseCategories() {
     let ids = selectedExpenseCategories.value.map((exp) => exp.id);
     // console.log({ ids: ids });
     ExpenseCategoryService.bulkDelete({ ids: ids });
-    expenseCategories.value = expenseCategory.value.filter((val) => !ids.includes(val.id));
+    expenseCategories.value = expenseCategories.value.filter((val) => !ids.includes(val.id));
 
     deleteExpenseCategoriesDialog.value = false;
     selectedExpenseCategories.value = null;
@@ -245,7 +253,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <Dialog v-model:visible="deleteExpenseCategoriesDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
                 <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="expense">Are you sure you want to delete the selected expenses?</span>
+                <span v-if="selectedExpenseCategories">Are you sure you want to delete the selected expenses?</span>
             </div>
             <template #footer>
                 <Button label="No" icon="pi pi-times" text @click="deleteExpenseCategoriesDialog = false" />

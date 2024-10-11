@@ -8,7 +8,6 @@ const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
 const products = ref(null);
 const chartOptions = ref(null);
-const stackedChartData = ref(null);
 const dashboardData = ref(null);
 const expenseStreamByMonth = ref(null);
 const incomeStreamByMonth = ref(null);
@@ -23,8 +22,6 @@ const items = ref([
 onMounted(() => {
     ProductService.getProductsSmall().then((data) => (products.value = data));
     chartOptions.value = setChartOptions();
-    setExpenseStreamByMonth();
-    setIncomeStreamByMonth();
     getDashboardData();
 });
 
@@ -32,20 +29,9 @@ async function getDashboardData() {
     dashboardData.value = await DashboardService.getDashboardData();
     total_expense_this_month.value = dashboardData.value.data.total_expense_this_month;
     total_income_this_month.value = dashboardData.value.data.total_income_this_month;
-}
 
-async function setExpenseStreamByMonth() {
-    let response = await DashboardService.getDashboardData().then((data) => {
-        return data.data.expense_stream_by_month;
-    });
-    expenseStreamByMonth.value = convertToStackedChartData(response);
-}
-
-async function setIncomeStreamByMonth() {
-    let response = await DashboardService.getDashboardData().then((data) => {
-        return data.data.income_stream_by_month;
-    });
-    incomeStreamByMonth.value = convertToStackedChartData(response);
+    expenseStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.expense_stream_by_month);
+    incomeStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.income_stream_by_month);
 }
 
 function convertToStackedChartData(data) {

@@ -40,6 +40,11 @@ const router = createRouter({
                             path: 'income-categories',
                             name: 'incomeCategories',
                             component: () => import('@/views/master-data/IncomeCategory.vue')
+                        },
+                        {
+                            path: 'wallets',
+                            name: 'wallets',
+                            component: () => import('@/views/master-data/Wallet.vue')
                         }
                     ]
                 },

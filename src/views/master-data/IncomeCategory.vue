@@ -55,15 +55,23 @@ function hideDialog() {
     submitted.value = false;
 }
 
+function showToastError(message) {
+    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+}
+
 async function saveIncomeCategory() {
     submitted.value = true;
 
     if (incomeCategory?.value.name) {
         if (incomeCategory.value.id) {
-            await IncomeCategoryService.update(incomeCategory.value.id, {
+            const response = await IncomeCategoryService.update(incomeCategory.value.id, {
                 name: incomeCategory.value.name,
                 description: incomeCategory.value.description
             });
+            if (response.status === 422) {
+                showToastError(response.data.errors.name[0]);
+                return;
+            }
             incomeCategories.value[findIndexById(incomeCategory.value.id)] = incomeCategory.value;
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Income Categories Updated', life: 3000 });
         } else {
@@ -71,6 +79,10 @@ async function saveIncomeCategory() {
                 name: incomeCategory.value.name,
                 description: incomeCategory.value.description
             });
+            if (response.status === 422) {
+                showToastError(response.data.errors.name[0]);
+                return;
+            }
             incomeCategories.value.unshift(response.data);
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Income Categories Created', life: 3000 });
         }
@@ -139,7 +151,7 @@ function deleteSelectedIncomeCategories() {
     let ids = selectedIncomeCategories.value.map((exp) => exp.id);
     // console.log({ ids: ids });
     IncomeCategoryService.bulkDelete({ ids: ids });
-    incomeCategories.value = incomeCategory.value.filter((val) => !ids.includes(val.id));
+    incomeCategories.value = incomeCategories.value.filter((val) => !ids.includes(val.id));
 
     deleteIncomeCategoriesDialog.value = false;
     selectedIncomeCategories.value = null;
@@ -245,7 +257,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <Dialog v-model:visible="deleteIncomeCategoriesDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
                 <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="incomeCategory">Are you sure you want to delete the selected income categories?</span>
+                <span v-if="selectedIncomeCategories">Are you sure you want to delete the selected income categories?</span>
             </div>
             <template #footer>
                 <Button label="No" icon="pi pi-times" text @click="deleteIncomeCategoriesDialog = false" />

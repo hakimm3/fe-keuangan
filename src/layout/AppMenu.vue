@@ -19,7 +19,8 @@ const model = ref([
         label: 'Master Data',
         items: [
             { label: 'Income Categories', icon: 'pi pi-fw pi-tags', to: '/master-data/income-categories' },
-            { label: 'Expense Categories', icon: 'pi pi-fw pi-tags', to: '/master-data/expense-categories' }
+            { label: 'Expense Categories', icon: 'pi pi-fw pi-tags', to: '/master-data/expense-categories' },
+            { label: 'Wallets', icon: 'pi pi-fw pi-wallet', to: '/master-data/wallets' }
         ]
     },
     {
