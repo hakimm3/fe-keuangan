@@ -2,6 +2,7 @@
 import { ExpenseService } from '@/service/data/ExpenseService';
 import { ExpenseCategoryService } from '@/service/master-data/ExpenseCategoryService';
 import { FilterMatchMode } from '@primevue/core/api';
+import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 
@@ -249,7 +250,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="date" class="block font-bold mb-3">Date</label>
-                    <Calendar id="date" v-model="expense.date" :invalid="submitted && !expense.date" required="true" showIcon fluid />
+                    <DatePicker id="date" v-model="expense.date" :invalid="submitted && !expense.date" required="true" showIcon fluid />
                     <small v-if="submitted && !expense.date" class="text-red-500">date is required.</small>
                 </div>
                 <div>
