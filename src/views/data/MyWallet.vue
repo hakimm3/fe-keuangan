@@ -165,6 +165,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 <template #start>
                     <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
                     <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedMyWallets || !selectedMyWallets.length" />
+                    <Button label="Transaction History" icon="pi pi-list" severity="secondary" class="ml-2" as="router-link" :to="{ name: 'myWalletTransactions' }" />
                 </template>
 
                 <template #end>

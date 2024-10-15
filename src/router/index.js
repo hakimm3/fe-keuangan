@@ -30,6 +30,11 @@ const router = createRouter({
                             path: 'my-wallets',
                             name: 'myWallets',
                             component: () => import('@/views/data/MyWallet.vue')
+                        },
+                        {
+                            path: 'my-wallets/transactions',
+                            name: 'myWalletTransactions',
+                            component: () => import('@/views/data/MyWalletTransaction.vue')
                         }
                     ]
                 },
