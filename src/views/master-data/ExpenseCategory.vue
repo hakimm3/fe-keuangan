@@ -68,7 +68,7 @@ async function saveExpenseCategory() {
                 name: expenseCategory.value.name,
                 description: expenseCategory.value.description
             });
-            if (response.status === 200) {
+            if (response.status === 422) {
                 showToastError(response.data.message);
                 return;
             }
@@ -79,6 +79,10 @@ async function saveExpenseCategory() {
                 name: expenseCategory.value.name,
                 description: expenseCategory.value.description
             });
+            if (response.status === 422) {
+                showToastError(response.data.message);
+                return;
+            }
             expenseCategories.value.unshift(response.data);
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Created', life: 3000 });
         }

@@ -1,5 +1,6 @@
 <script setup>
 import { ExpenseService } from '@/service/data/ExpenseService';
+import { MyWalletService } from '@/service/data/MyWalletService';
 import { ExpenseCategoryService } from '@/service/master-data/ExpenseCategoryService';
 import { FilterMatchMode } from '@primevue/core/api';
 import DatePicker from 'primevue/datepicker';
@@ -8,6 +9,7 @@ import { onMounted, ref } from 'vue';
 
 const expenses = ref();
 const expenseCategories = ref();
+const wallets = ref();
 const isLoading = ref(false);
 
 const fetchExpenses = async () => {
@@ -25,6 +27,7 @@ const fetchExpenseCategories = async () => {
     try {
         isLoading.value = true;
         expenseCategories.value = await ExpenseCategoryService.getData().then((data) => data.map((category) => ({ label: category.name, value: category })));
+        wallets.value = await MyWalletService.getData().then((data) => data.map((wallet) => ({ label: wallet.wallet.name, value: wallet })));
     } catch (error) {
         console.error(error);
     } finally {
@@ -69,6 +72,10 @@ function formatDate(date) {
     return;
 }
 
+function showToastError(message) {
+    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+}
+
 function openNew() {
     expense.value = {};
     submitted.value = false;
@@ -85,22 +92,49 @@ async function saveExpense() {
 
     if (expense?.value.description?.trim() && expense?.value.amount) {
         if (expense.value.id) {
-            await ExpenseService.update(expense.value.id, {
+            const response = await ExpenseService.update(expense.value.id, {
                 date: expense.value.date,
                 description: expense.value.description,
                 amount: expense.value.amount,
-                category_id: expense.value.category.value.id
+                category_id: expense.value.category.value.id,
+                user_wallet_id: expense.value.wallet.value.id
             });
-            expenses.value[findIndexById(expense.value.id)] = { id: expense.value.id, date: expense.value.date, description: expense.value.description, amount: expense.value.amount, category: { name: expense.value.category.value.name } };
+
+            if (response.status === 422) {
+                showToastError(response.data.message);
+                return;
+            }
+            expenses.value[findIndexById(expense.value.id)] = {
+                id: expense.value.id,
+                date: expense.value.date,
+                description: expense.value.description,
+                amount: expense.value.amount,
+                user_wallet_id: expense.value.wallet.value.id,
+                category: { ...expense.value.category.value },
+                wallet: { ...expense.value.wallet.value.wallet }
+            };
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Updated', life: 3000 });
         } else {
-            await ExpenseService.create({
+            const response = await ExpenseService.create({
                 date: expense.value.date,
                 description: expense.value.description,
                 amount: expense.value.amount,
-                category_id: expense.value.category.value.id
+                category_id: expense.value.category.value.id,
+                user_wallet_id: expense.value.wallet.value.id
             });
-            expenses.value.unshift({ date: expense.value.date, description: expense.value.description, amount: expense.value.amount, category: { name: expense.value.category.value.name } });
+            if (response.status === 422) {
+                showToastError(response.data.message);
+                return;
+            }
+            expenses.value.unshift({
+                id: response.data.id,
+                date: expense.value.date,
+                description: expense.value.description,
+                amount: expense.value.amount,
+                user_wallet_id: expense.value.wallet.value.id,
+                category: { ...expense.value.category.value },
+                wallet: { ...expense.value.wallet.value.wallet }
+            });
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Created', life: 3000 });
         }
 
@@ -115,7 +149,8 @@ function editExpense(exp) {
         date: new Date(exp.date),
         description: exp.description,
         amount: exp.amount,
-        category: expenseCategories.value.find((category) => category.value.id === exp.category.id)
+        category: expenseCategories.value.find((category) => category.value.id === exp.category.id),
+        wallet: wallets.value.find((wallet) => wallet.value.id === exp.user_wallet_id)
     };
     expenseDialog.value = true;
 }
@@ -232,6 +267,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column field="description" header="Description" sortable></Column>
                 <Column field="category.name" header="Category" sortable></Column>
+                <Column field="wallet.name" header="Wallet" sortable></Column>
                 <Column field="amount" header="Amount" sortable>
                     <template #body="slotProps">
                         {{ formatCurrency(slotProps.data.amount) }}
@@ -262,6 +298,11 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                     <label for="category" class="block font-bold mb-3">Category</label>
                     <Select id="category" v-model="expense.category" :options="expenseCategories" optionLabel="label" placeholder="Select a Category" required="true" :invalid="submitted && !expense.category" fluid></Select>
                     <small v-if="submitted && !expense.category" class="text-red-500">category is required.</small>
+                </div>
+                <div>
+                    <label for="wallet" class="block font-bold mb-3">Wallet</label>
+                    <Select id="wallet" v-model="expense.wallet" :options="wallets" optionLabel="label" placeholder="Select a wallet source" required="true" :invalid="submitted && !expense.wallet" fluid></Select>
+                    <small v-if="submitted && !expense.wallet" class="text-red-500">wallet is required.</small>
                 </div>
                 <div>
                     <label for="price" class="block font-bold mb-3">Amount</label>

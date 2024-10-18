@@ -1,5 +1,6 @@
 <script setup>
 import { IncomeService } from '@/service/data/IncomeService';
+import { MyWalletService } from '@/service/data/MyWalletService';
 import { IncomeCategoryService } from '@/service/master-data/IncomeCategoryService';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
@@ -7,6 +8,7 @@ import { onMounted, ref } from 'vue';
 
 const incomes = ref();
 const incomeCategories = ref();
+const wallets = ref();
 const isLoading = ref(false);
 
 const fetchIncomes = async () => {
@@ -24,6 +26,7 @@ const fetchIncomeCategories = async () => {
     try {
         isLoading.value = true;
         incomeCategories.value = await IncomeCategoryService.getData().then((data) => data.map((category) => ({ label: category.name, value: category })));
+        wallets.value = await MyWalletService.getData().then((data) => data.map((wallet) => ({ label: wallet.wallet.name, value: wallet })));
     } catch (error) {
         console.error(error);
     } finally {
@@ -68,6 +71,10 @@ function formatDate(date) {
     return;
 }
 
+function showToastError(message) {
+    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+}
+
 function openNew() {
     income.value = {};
     submitted.value = false;
@@ -84,22 +91,52 @@ async function saveIncome() {
 
     if (income?.value.description?.trim() && income?.value.amount) {
         if (income.value.id) {
-            await IncomeService.update(income.value.id, {
+            const response = await IncomeService.update(income.value.id, {
                 date: income.value.date,
                 description: income.value.description,
                 amount: income.value.amount,
-                category_id: income.value.category.value.id
+                category_id: income.value.category.value.id,
+                user_wallet_id: income.value.wallet.value.id
             });
-            incomes.value[findIndexById(income.value.id)] = { id: income.value.id, date: income.value.date, description: income.value.description, amount: income.value.amount, category: { name: income.value.category.value.name } };
+
+            if (response.status === 422) {
+                showToastError(response.data.message);
+                return;
+            }
+
+            incomes.value[findIndexById(income.value.id)] = {
+                id: income.value.id,
+                date: income.value.date,
+                description: income.value.description,
+                amount: income.value.amount,
+                user_wallet_id: income.value.wallet.value.id,
+                category: { ...income.value.category.value },
+                wallet: { ...income.value.wallet.value.wallet }
+            };
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Income Updated', life: 3000 });
         } else {
-            await IncomeService.create({
+            const response = await IncomeService.create({
                 date: income.value.date,
                 description: income.value.description,
                 amount: income.value.amount,
-                category_id: income.value.category.value.id
+                category_id: income.value.category.value.id,
+                user_wallet_id: income.value.wallet.value.id
             });
-            incomes.value.unshift({ date: income.value.date, description: income.value.description, amount: income.value.amount, category: { name: income.value.category.value.name } });
+
+            if (response.status === 422) {
+                showToastError(response.data.message);
+                return;
+            }
+
+            incomes.value.unshift({
+                id: response.data.id,
+                date: income.value.date,
+                description: income.value.description,
+                amount: income.value.amount,
+                user_wallet_id: income.value.wallet.value.id,
+                category: { ...income.value.category.value },
+                wallet: { ...income.value.wallet.value.wallet }
+            });
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Income Created', life: 3000 });
         }
 
@@ -114,7 +151,8 @@ function editIncome(inc) {
         date: new Date(inc.date),
         description: inc.description,
         amount: inc.amount,
-        category: incomeCategories.value.find((category) => category.value.id === inc.category.id)
+        category: incomeCategories.value.find((category) => category.value.id === inc.category.id),
+        wallet: wallets.value.find((wallet) => wallet.value.id === inc.user_wallet_id)
     };
     incomeDialog.value = true;
 }
@@ -231,6 +269,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column field="description" header="Description" sortable></Column>
                 <Column field="category.name" header="Category" sortable></Column>
+                <Column field="wallet.name" header="Wallet" sortable></Column>
                 <Column field="amount" header="Amount" sortable>
                     <template #body="slotProps">
                         {{ formatCurrency(slotProps.data.amount) }}
@@ -261,6 +300,11 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                     <label for="category" class="block font-bold mb-3">Category</label>
                     <Select id="category" v-model="income.category" :options="incomeCategories" optionLabel="label" placeholder="Select a Category" required="true" :invalid="submitted && !income.category" fluid></Select>
                     <small v-if="submitted && !income.category" class="text-red-500">category is required.</small>
+                </div>
+                <div>
+                    <label for="wallet" class="block font-bold mb-3">Wallet</label>
+                    <Select id="wallet" v-model="income.wallet" :options="wallets" optionLabel="label" placeholder="Select a wallet source" required="true" :invalid="submitted && !income.wallet" fluid></Select>
+                    <small v-if="submitted && !income.wallet" class="text-red-500">wallet is required.</small>
                 </div>
                 <div>
                     <label for="price" class="block font-bold mb-3">Amount</label>

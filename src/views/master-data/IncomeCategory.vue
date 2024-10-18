@@ -69,7 +69,7 @@ async function saveIncomeCategory() {
                 description: incomeCategory.value.description
             });
             if (response.status === 422) {
-                showToastError(response.data.errors.name[0]);
+                showToastError(response.data.message);
                 return;
             }
             incomeCategories.value[findIndexById(incomeCategory.value.id)] = incomeCategory.value;
@@ -80,7 +80,7 @@ async function saveIncomeCategory() {
                 description: incomeCategory.value.description
             });
             if (response.status === 422) {
-                showToastError(response.data.errors.name[0]);
+                showToastError(response.data.message);
                 return;
             }
             incomeCategories.value.unshift(response.data);
