@@ -1,0 +1,1 @@
+import{B as a}from"./BaseServices-C7MaePp3.js";const t="http://backend.keuangan.net/api/master-data/wallets",s={getData:async()=>await a.getData(t),create:async e=>await a.create(e,t),update:async(e,r)=>await a.update(e,r,t),delete:async e=>await a.delete(e,t),bulkDelete:async e=>await a.bulkDelete(e,`${t}/bulk-delete`)};export{s as W};
