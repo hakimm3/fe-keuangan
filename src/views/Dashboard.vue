@@ -7,15 +7,17 @@ const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
 const chartOptions = ref(null);
 const dashboardData = ref(null);
+
+const incomeVsExpenseByMonth = ref(null);
+const lineOptions = ref(null);
+
+const polarData = ref(null);
+
 const expenseStreamByMonth = ref(null);
 const incomeStreamByMonth = ref(null);
 const total_expense_this_month = ref(0);
 const total_income_this_month = ref(0);
-
-const items = ref([
-    { label: 'Add New', icon: 'pi pi-fw pi-plus' },
-    { label: 'Remove', icon: 'pi pi-fw pi-trash' }
-]);
+const total_money_in_all_wallet = ref(0);
 
 onMounted(() => {
     chartOptions.value = setChartOptions();
@@ -26,9 +28,12 @@ async function getDashboardData() {
     dashboardData.value = await DashboardService.getDashboardData();
     total_expense_this_month.value = dashboardData.value.data.total_expense_this_month;
     total_income_this_month.value = dashboardData.value.data.total_income_this_month;
+    total_money_in_all_wallet.value = dashboardData.value.data.total_money_in_all_wallet;
 
     expenseStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.expense_stream_by_month);
     incomeStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.income_stream_by_month);
+    incomeVsExpenseByMonth.value = convertToLineData(dashboardData.value.data.income_vs_expense_by_month);
+    polarData.value = convertToPolarData(dashboardData.value.data.expense_by_wallet);
 }
 
 function convertToStackedChartData(data) {
@@ -102,9 +107,123 @@ function setChartOptions() {
     };
 }
 
+// line chart
+const documentStyle = getComputedStyle(document.documentElement);
+const textColor = documentStyle.getPropertyValue('--text-color');
+const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
+const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+
+function convertToLineData(data) {
+    const months = Object.keys(data);
+    const incomeData = months.map((month) => data[month].income);
+    const expenseData = months.map((month) => data[month].expense);
+
+    return {
+        labels: months,
+        datasets: [
+            {
+                label: 'Income',
+                data: incomeData,
+                fill: false,
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-700'),
+                borderColor: documentStyle.getPropertyValue('--p-primary-700'),
+                tension: 0.4
+            },
+            {
+                label: 'Expense',
+                data: expenseData,
+                fill: false,
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
+                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
+                tension: 0.4
+            },
+            {
+                label: 'Balance',
+                data: incomeData.map((income, index) => income - expenseData[index]),
+                fill: false,
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-300'),
+                borderColor: documentStyle.getPropertyValue('--p-primary-300'),
+                tension: 0.4
+            }
+        ]
+    };
+}
+
+lineOptions.value = {
+    plugins: {
+        legend: {
+            labels: {
+                fontColor: textColor
+            }
+        }
+    },
+    scales: {
+        x: {
+            ticks: {
+                color: textColorSecondary
+            },
+            grid: {
+                color: surfaceBorder,
+                drawBorder: false
+            }
+        },
+        y: {
+            ticks: {
+                color: textColorSecondary
+            },
+            grid: {
+                color: surfaceBorder,
+                drawBorder: false
+            }
+        }
+    }
+};
+
 const formatCurrency = (value) => {
     return value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
 };
+
+function convertToPolarData(data) {
+    const labels = data.map((item) => item.wallet);
+    const totals = data.map((item) => item.total);
+
+    const documentStyle = getComputedStyle(document.documentElement);
+    const colors = [
+        documentStyle.getPropertyValue('--p-indigo-500'),
+        documentStyle.getPropertyValue('--p-purple-500'),
+        documentStyle.getPropertyValue('--p-teal-500'),
+        documentStyle.getPropertyValue('--p-orange-500'),
+        documentStyle.getPropertyValue('--p-red-500')
+    ];
+
+    return {
+        labels,
+        datasets: [
+            {
+                data: totals,
+                backgroundColor: colors.slice(0, data.length),
+                label: 'Wallet Totals'
+            }
+        ]
+    };
+}
+
+const polarOptions = ref({
+    plugins: {
+        legend: {
+            labels: {
+                color: textColor
+            }
+        }
+    },
+    scales: {
+        r: {
+            grid: {
+                color: surfaceBorder
+            }
+        }
+    }
+});
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
     chartOptions.value = setChartOptions();
@@ -163,8 +282,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
             <div class="card mb-0">
                 <div class="flex justify-between mb-4">
                     <div>
-                        <span class="block text-muted-color font-medium mb-4">Comments</span>
-                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">152 Unread</div>
+                        <span class="block text-muted-color font-medium mb-4">Combined Wallet Balance</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ formatCurrency(total_money_in_all_wallet - 0) }}</div>
                     </div>
                     <div class="flex items-center justify-center bg-purple-100 dark:bg-purple-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
                         <i class="pi pi-comment text-purple-500 !text-xl"></i>
@@ -181,87 +300,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 <Chart type="bar" :data="expenseStreamByMonth" :options="chartOptions" class="h-80" />
             </div>
             <div class="card">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="font-semibold text-xl">Best Selling Products</div>
-                    <div>
-                        <Button icon="pi pi-ellipsis-v" class="p-button-text p-button-plain p-button-rounded" @click="$refs.menu2.toggle($event)"></Button>
-                        <Menu ref="menu2" :popup="true" :model="items" class="!min-w-40"></Menu>
-                    </div>
-                </div>
-                <ul class="list-none p-0 m-0">
-                    <li class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                        <div>
-                            <span class="text-surface-900 dark:text-surface-0 font-medium mr-2 mb-1 md:mb-0">Space T-Shirt</span>
-                            <div class="mt-1 text-muted-color">Clothing</div>
-                        </div>
-                        <div class="mt-2 md:mt-0 flex items-center">
-                            <div class="bg-surface-300 dark:bg-surface-500 rounded-border overflow-hidden w-40 lg:w-24" style="height: 8px">
-                                <div class="bg-orange-500 h-full" style="width: 50%"></div>
-                            </div>
-                            <span class="text-orange-500 ml-4 font-medium">%50</span>
-                        </div>
-                    </li>
-                    <li class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                        <div>
-                            <span class="text-surface-900 dark:text-surface-0 font-medium mr-2 mb-1 md:mb-0">Portal Sticker</span>
-                            <div class="mt-1 text-muted-color">Accessories</div>
-                        </div>
-                        <div class="mt-2 md:mt-0 ml-0 md:ml-20 flex items-center">
-                            <div class="bg-surface-300 dark:bg-surface-500 rounded-border overflow-hidden w-40 lg:w-24" style="height: 8px">
-                                <div class="bg-cyan-500 h-full" style="width: 16%"></div>
-                            </div>
-                            <span class="text-cyan-500 ml-4 font-medium">%16</span>
-                        </div>
-                    </li>
-                    <li class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                        <div>
-                            <span class="text-surface-900 dark:text-surface-0 font-medium mr-2 mb-1 md:mb-0">Supernova Sticker</span>
-                            <div class="mt-1 text-muted-color">Accessories</div>
-                        </div>
-                        <div class="mt-2 md:mt-0 ml-0 md:ml-20 flex items-center">
-                            <div class="bg-surface-300 dark:bg-surface-500 rounded-border overflow-hidden w-40 lg:w-24" style="height: 8px">
-                                <div class="bg-pink-500 h-full" style="width: 67%"></div>
-                            </div>
-                            <span class="text-pink-500 ml-4 font-medium">%67</span>
-                        </div>
-                    </li>
-                    <li class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                        <div>
-                            <span class="text-surface-900 dark:text-surface-0 font-medium mr-2 mb-1 md:mb-0">Wonders Notebook</span>
-                            <div class="mt-1 text-muted-color">Office</div>
-                        </div>
-                        <div class="mt-2 md:mt-0 ml-0 md:ml-20 flex items-center">
-                            <div class="bg-surface-300 dark:bg-surface-500 rounded-border overflow-hidden w-40 lg:w-24" style="height: 8px">
-                                <div class="bg-green-500 h-full" style="width: 35%"></div>
-                            </div>
-                            <span class="text-primary ml-4 font-medium">%35</span>
-                        </div>
-                    </li>
-                    <li class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                        <div>
-                            <span class="text-surface-900 dark:text-surface-0 font-medium mr-2 mb-1 md:mb-0">Mat Black Case</span>
-                            <div class="mt-1 text-muted-color">Accessories</div>
-                        </div>
-                        <div class="mt-2 md:mt-0 ml-0 md:ml-20 flex items-center">
-                            <div class="bg-surface-300 dark:bg-surface-500 rounded-border overflow-hidden w-40 lg:w-24" style="height: 8px">
-                                <div class="bg-purple-500 h-full" style="width: 75%"></div>
-                            </div>
-                            <span class="text-purple-500 ml-4 font-medium">%75</span>
-                        </div>
-                    </li>
-                    <li class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                        <div>
-                            <span class="text-surface-900 dark:text-surface-0 font-medium mr-2 mb-1 md:mb-0">Robots T-Shirt</span>
-                            <div class="mt-1 text-muted-color">Clothing</div>
-                        </div>
-                        <div class="mt-2 md:mt-0 ml-0 md:ml-20 flex items-center">
-                            <div class="bg-surface-300 dark:bg-surface-500 rounded-border overflow-hidden w-40 lg:w-24" style="height: 8px">
-                                <div class="bg-teal-500 h-full" style="width: 40%"></div>
-                            </div>
-                            <span class="text-teal-500 ml-4 font-medium">%40</span>
-                        </div>
-                    </li>
-                </ul>
+                <div class="font-semibold text-xl mb-4">Monthly Cashflow</div>
+                <Chart type="line" :data="incomeVsExpenseByMonth" :options="lineOptions"></Chart>
             </div>
         </div>
         <div class="col-span-12 xl:col-span-6">
@@ -270,69 +310,10 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 <Chart type="bar" :data="incomeStreamByMonth" :options="chartOptions" class="h-80" />
             </div>
             <div class="card">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="font-semibold text-xl">Notifications</div>
-                    <div>
-                        <Button icon="pi pi-ellipsis-v" class="p-button-text p-button-plain p-button-rounded" @click="$refs.menu1.toggle($event)"></Button>
-                        <Menu ref="menu1" :popup="true" :model="items" class="!min-w-40"></Menu>
-                    </div>
+                <div class="font-semibold text-xl mb-4">Expense by Wallet</div>
+                <div class="flex flex-col items-center">
+                    <Chart type="polarArea" :data="polarData" :options="polarOptions" class="h-100" />
                 </div>
-
-                <span class="block text-muted-color font-medium mb-4">TODAY</span>
-                <ul class="p-0 mx-0 mt-0 mb-6 list-none">
-                    <li class="flex items-center py-2 border-b border-surface">
-                        <div class="w-12 h-12 flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-full mr-4 shrink-0">
-                            <i class="pi pi-dollar !text-xl text-blue-500"></i>
-                        </div>
-                        <span class="text-surface-900 dark:text-surface-0 leading-normal"
-                            >Richard Jones
-                            <span class="text-surface-700 dark:text-surface-100">has purchased a blue t-shirt for <span class="text-primary font-bold">$79.00</span></span>
-                        </span>
-                    </li>
-                    <li class="flex items-center py-2">
-                        <div class="w-12 h-12 flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-full mr-4 shrink-0">
-                            <i class="pi pi-download !text-xl text-orange-500"></i>
-                        </div>
-                        <span class="text-surface-700 dark:text-surface-100 leading-normal">Your request for withdrawal of <span class="text-primary font-bold">$2500.00</span> has been initiated.</span>
-                    </li>
-                </ul>
-
-                <span class="block text-muted-color font-medium mb-4">YESTERDAY</span>
-                <ul class="p-0 m-0 list-none mb-6">
-                    <li class="flex items-center py-2 border-b border-surface">
-                        <div class="w-12 h-12 flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-full mr-4 shrink-0">
-                            <i class="pi pi-dollar !text-xl text-blue-500"></i>
-                        </div>
-                        <span class="text-surface-900 dark:text-surface-0 leading-normal"
-                            >Keyser Wick
-                            <span class="text-surface-700 dark:text-surface-100">has purchased a black jacket for <span class="text-primary font-bold">$59.00</span></span>
-                        </span>
-                    </li>
-                    <li class="flex items-center py-2 border-b border-surface">
-                        <div class="w-12 h-12 flex items-center justify-center bg-pink-100 dark:bg-pink-400/10 rounded-full mr-4 shrink-0">
-                            <i class="pi pi-question !text-xl text-pink-500"></i>
-                        </div>
-                        <span class="text-surface-900 dark:text-surface-0 leading-normal"
-                            >Jane Davis
-                            <span class="text-surface-700 dark:text-surface-100">has posted a new questions about your product.</span>
-                        </span>
-                    </li>
-                </ul>
-                <span class="block text-muted-color font-medium mb-4">LAST WEEK</span>
-                <ul class="p-0 m-0 list-none">
-                    <li class="flex items-center py-2 border-b border-surface">
-                        <div class="w-12 h-12 flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-full mr-4 shrink-0">
-                            <i class="pi pi-arrow-up !text-xl text-green-500"></i>
-                        </div>
-                        <span class="text-surface-900 dark:text-surface-0 leading-normal">Your revenue has increased by <span class="text-primary font-bold">%25</span>.</span>
-                    </li>
-                    <li class="flex items-center py-2 border-b border-surface">
-                        <div class="w-12 h-12 flex items-center justify-center bg-purple-100 dark:bg-purple-400/10 rounded-full mr-4 shrink-0">
-                            <i class="pi pi-heart !text-xl text-purple-500"></i>
-                        </div>
-                        <span class="text-surface-900 dark:text-surface-0 leading-normal"><span class="text-primary font-bold">12</span> users have added your products to their wishlist.</span>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
