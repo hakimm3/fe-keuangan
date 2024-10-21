@@ -125,24 +125,24 @@ function convertToLineData(data) {
                 label: 'Income',
                 data: incomeData,
                 fill: false,
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-700'),
-                borderColor: documentStyle.getPropertyValue('--p-primary-700'),
+                backgroundColor: documentStyle.getPropertyValue('--p-green-700'),
+                borderColor: documentStyle.getPropertyValue('--p-green-700'),
                 tension: 0.4
             },
             {
                 label: 'Expense',
                 data: expenseData,
                 fill: false,
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
-                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
+                backgroundColor: documentStyle.getPropertyValue('--p-orange-500'),
+                borderColor: documentStyle.getPropertyValue('--p-orange-500'),
                 tension: 0.4
             },
             {
                 label: 'Balance',
                 data: incomeData.map((income, index) => income - expenseData[index]),
                 fill: false,
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-300'),
-                borderColor: documentStyle.getPropertyValue('--p-primary-300'),
+                backgroundColor: documentStyle.getPropertyValue('--p-blue-500'),
+                borderColor: documentStyle.getPropertyValue('--p-blue-500'),
                 tension: 0.4
             }
         ]
