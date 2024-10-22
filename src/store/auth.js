@@ -18,6 +18,7 @@ export const authStore = defineStore('auth', () => {
             if (response.status === 200) {
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 localStorage.setItem('token', response.data.token);
+                localStorage.setItem('permissions', JSON.stringify(response.data.permissions));
                 router.push('/');
             }
             return response.data;
@@ -31,8 +32,16 @@ export const authStore = defineStore('auth', () => {
         }
     };
 
+    const logout = () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('permissions');
+        router.push({ name: 'login' });
+    };
+
     return {
         login,
+        logout,
         isValidationError,
         validationErrors
     };

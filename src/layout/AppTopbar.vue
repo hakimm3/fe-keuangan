@@ -1,8 +1,27 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
+import { authStore } from '@/store/auth';
+import { ref } from 'vue';
 import AppConfigurator from './AppConfigurator.vue';
 
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
+
+const profileDropdownVisible = ref(false);
+const auth = authStore();
+
+const toggleProfileDropdown = () => {
+    profileDropdownVisible.value = !profileDropdownVisible.value;
+};
+
+const goToProfile = () => {
+    profileDropdownVisible.value = false;
+};
+
+const logout = () => {
+    profileDropdownVisible.value = false;
+    console.log('logout');
+    auth.logout();
+};
 </script>
 
 <template>
@@ -68,10 +87,16 @@ const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
-                    </button>
+                    <div class="relative">
+                        <button type="button" class="layout-topbar-action" @click="toggleProfileDropdown">
+                            <i class="pi pi-user"></i>
+                            <span>Profile</span>
+                        </button>
+                        <div v-if="profileDropdownVisible" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+                            <button type="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" @click="goToProfile">Profile</button>
+                            <button type="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" @click="logout">Logout</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
