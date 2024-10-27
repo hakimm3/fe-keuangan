@@ -2,12 +2,13 @@ import { defineStore } from 'pinia';
 
 export const usePermissionsStore = defineStore('permissions', {
     state: () => ({
-        permissions: []
+        permissions: JSON.parse(localStorage.getItem('permissions')) || []
     }),
 
     actions: {
         setPermissions(permissions) {
             this.permissions = permissions;
+            localStorage.setItem('permissions', JSON.stringify(permissions));
         }
     },
 

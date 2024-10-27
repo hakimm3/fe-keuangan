@@ -1,8 +1,8 @@
 import { BaseService } from '../BaseServices';
 
-const API_URL = import.meta.env.VITE_BASE_URL + 'authorization/users';
+const API_URL = import.meta.env.VITE_BASE_URL + 'authorization/roles';
 
-export const UserService = {
+export const RoleService = {
     getData: async () => {
         return await BaseService.getData(API_URL);
     },

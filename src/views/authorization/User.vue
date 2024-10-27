@@ -64,15 +64,15 @@ async function saveUser() {
                 name: user.value.name,
                 email: user.value.email
             });
-            users.value[findIndexById(user.value.id)] = user.value;
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Updated', life: 3000 });
+            users.value[findIndexById(user.value.id)] = { ...user.value };
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'User Updated', life: 3000 });
         } else {
             const response = await UserService.create({
                 name: user.value.name,
                 email: user.value.email
             });
-            users.value.unshift(response.data);
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Created', life: 3000 });
+            users.value.unshift({ ...response.data });
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'User Created', life: 3000 });
         }
 
         userDialog.value = false;
@@ -100,7 +100,7 @@ function deleteUser() {
     users.value = users.value.filter((val) => val.id !== user.value.id);
     userDialog.value = false;
     user.value = {};
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Deleted', life: 3000 });
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'User Deleted', life: 3000 });
 }
 
 function findIndexById(id) {
@@ -139,11 +139,11 @@ function deleteSelectedUsers() {
     let ids = selectedUsers.value.map((exp) => exp.id);
     // console.log({ ids: ids });
     UserService.bulkDelete({ ids: ids });
-    users.value = user.value.filter((val) => !ids.includes(val.id));
+    users.value = users.value.filter((val) => !ids.includes(val.id));
 
     deleteUsersDialog.value = false;
     selectedUsers.value = null;
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Expenses Deleted', life: 3000 });
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'Users Deleted', life: 3000 });
 }
 
 const breadcrumbItems = ref([{ label: 'Dashboard', to: '/' }, { label: 'Authorization' }, { label: 'User' }]);
@@ -205,7 +205,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="Expense Category Details" :modal="true">
+        <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="User Category Details" :modal="true">
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="name" class="block font-bold mb-3">Name</label>
@@ -225,7 +225,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             </template>
         </Dialog>
 
-        <Dialog v-model:visible="importUserDialog" :style="{ width: '450px' }" header="Import Expense" :modal="true">
+        <Dialog v-model:visible="importUserDialog" :style="{ width: '450px' }" header="Import User" :modal="true">
             <FileUpload name="file" @uploader="onUpload" @select="onSelectedFile" :maxFileSize="1000000" customUpload />
         </Dialog>
 
@@ -246,7 +246,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <Dialog v-model:visible="deleteUsersDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
                 <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="expense">Are you sure you want to delete the selected users?</span>
+                <span v-if="selectedUsers">Are you sure you want to delete the selected users?</span>
             </div>
             <template #footer>
                 <Button label="No" icon="pi pi-times" text @click="deleteUsersDialog = false" />

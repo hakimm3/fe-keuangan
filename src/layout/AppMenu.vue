@@ -27,8 +27,8 @@ const model = ref([
     {
         label: 'Authorization',
         items: [
-            { label: 'Users', icon: 'pi pi-fw pi-user', to: '/authorization/users', permission: 'auth-users-read' }
-            // { label: 'Roles', icon: 'pi pi-fw pi-users', to: '/authorization/roles' }
+            { label: 'Users', icon: 'pi pi-fw pi-user', to: '/authorization/users', permission: 'auth-users-read' },
+            { label: 'Roles', icon: 'pi pi-fw pi-users', to: '/authorization/roles', permission: 'auth-roles-read' }
         ]
     }
 ]);
