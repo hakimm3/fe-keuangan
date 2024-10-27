@@ -2,12 +2,14 @@ import router from '@/router';
 import axios from 'axios';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { usePermissionsStore } from './permissions';
 
 const API_URL = import.meta.env.VITE_BASE_URL + 'auth/';
 
 export const authStore = defineStore('auth', () => {
     const isValidationError = ref(false);
     const validationErrors = ref([]);
+    const permissionsStore = usePermissionsStore();
 
     const login = async (email, password) => {
         try {
@@ -18,7 +20,8 @@ export const authStore = defineStore('auth', () => {
             if (response.status === 200) {
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 localStorage.setItem('token', response.data.token);
-                localStorage.setItem('permissions', JSON.stringify(response.data.permissions));
+                permissionsStore.setPermissions(response.data.permissions);
+                console.log(response.data.permissions);
                 router.push('/');
             }
             return response.data;

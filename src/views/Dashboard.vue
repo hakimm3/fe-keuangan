@@ -11,7 +11,7 @@ const dashboardData = ref(null);
 const incomeVsExpenseByMonth = ref(null);
 const lineOptions = ref(null);
 
-const polarData = ref(null);
+const expenseByWallet = ref(null);
 
 const expenseStreamByMonth = ref(null);
 const incomeStreamByMonth = ref(null);
@@ -33,7 +33,7 @@ async function getDashboardData() {
     expenseStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.expense_stream_by_month);
     incomeStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.income_stream_by_month);
     incomeVsExpenseByMonth.value = convertToLineData(dashboardData.value.data.income_vs_expense_by_month);
-    polarData.value = convertToPolarData(dashboardData.value.data.expense_by_wallet);
+    expenseByWallet.value = convertToPieData(dashboardData.value.data.expense_by_wallet);
 }
 
 function convertToStackedChartData(data) {
@@ -183,7 +183,7 @@ const formatCurrency = (value) => {
     return value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
 };
 
-function convertToPolarData(data) {
+function convertToPieData(data) {
     const labels = data.map((item) => item.wallet);
     const totals = data.map((item) => item.total);
 
@@ -195,6 +195,13 @@ function convertToPolarData(data) {
         documentStyle.getPropertyValue('--p-orange-500'),
         documentStyle.getPropertyValue('--p-red-500')
     ];
+    const hoverColors = [
+        documentStyle.getPropertyValue('--p-indigo-400'),
+        documentStyle.getPropertyValue('--p-purple-400'),
+        documentStyle.getPropertyValue('--p-teal-400'),
+        documentStyle.getPropertyValue('--p-orange-400'),
+        documentStyle.getPropertyValue('--p-red-400')
+    ];
 
     return {
         labels,
@@ -202,28 +209,23 @@ function convertToPolarData(data) {
             {
                 data: totals,
                 backgroundColor: colors.slice(0, data.length),
+                hoverBackgroundColor: hoverColors.slice(0, data.length),
                 label: 'Wallet Totals'
             }
         ]
     };
 }
 
-const polarOptions = ref({
+const pieOptions = {
     plugins: {
         legend: {
             labels: {
+                usePointStyle: true,
                 color: textColor
             }
         }
-    },
-    scales: {
-        r: {
-            grid: {
-                color: surfaceBorder
-            }
-        }
     }
-});
+};
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
     chartOptions.value = setChartOptions();
@@ -312,7 +314,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
             <div class="card">
                 <div class="font-semibold text-xl mb-4">Expense by Wallet</div>
                 <div class="flex flex-col items-center">
-                    <Chart type="polarArea" :data="polarData" :options="polarOptions" class="h-100" />
+                    <Chart type="pie" :data="expenseByWallet" :options="pieOptions" class="h-80" />
                 </div>
             </div>
         </div>

@@ -6,28 +6,28 @@ import AppMenuItem from './AppMenuItem.vue';
 const model = ref([
     {
         label: 'Home',
-        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/', permission: 'data-incomes-create' }]
     },
     {
         label: 'Data',
         items: [
-            { label: 'Incomes', icon: 'pi pi-fw pi-money-bill', to: '/data/incomes' },
-            { label: 'Expenses', icon: 'pi pi-fw pi-money-bill', to: '/data/expenses' },
-            { label: 'My Wallets', icon: 'pi pi-fw pi-wallet', to: '/data/my-wallets' }
+            { label: 'Incomes', icon: 'pi pi-fw pi-money-bill', to: '/data/incomes', permission: 'data-incomes-read' },
+            { label: 'Expenses', icon: 'pi pi-fw pi-money-bill', to: '/data/expenses', permission: 'data-expenses-read' },
+            { label: 'My Wallets', icon: 'pi pi-fw pi-wallet', to: '/data/my-wallets', permission: 'data-my-wallets-read' }
         ]
     },
     {
         label: 'Master Data',
         items: [
-            { label: 'Income Categories', icon: 'pi pi-fw pi-tags', to: '/master-data/income-categories' },
-            { label: 'Expense Categories', icon: 'pi pi-fw pi-tags', to: '/master-data/expense-categories' },
-            { label: 'Wallets', icon: 'pi pi-fw pi-wallet', to: '/master-data/wallets' }
+            { label: 'Income Categories', icon: 'pi pi-fw pi-tags', to: '/master-data/income-categories', permission: 'master_data-income_categories-read' },
+            { label: 'Expense Categories', icon: 'pi pi-fw pi-tags', to: '/master-data/expense-categories', permission: 'master_data-expense_categories-read' },
+            { label: 'Wallets', icon: 'pi pi-fw pi-wallet', to: '/master-data/wallets', permission: 'master_data-wallets-read' }
         ]
     },
     {
         label: 'Authorization',
         items: [
-            { label: 'Users', icon: 'pi pi-fw pi-user', to: '/authorization/users' }
+            { label: 'Users', icon: 'pi pi-fw pi-user', to: '/authorization/users', permission: 'auth-users-read' }
             // { label: 'Roles', icon: 'pi pi-fw pi-users', to: '/authorization/roles' }
         ]
     }
