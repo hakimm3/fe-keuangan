@@ -188,7 +188,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 <Column :exportable="false">
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editRole(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteRole(slotProps.data)" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger mr-2" @click="confirmDeleteRole(slotProps.data)" />
+                        <Button icon="pi pi-lock" outlined rounded severity="info" as="router-link" :to="{ name: 'role-permissions', params: { id: slotProps.data.id } }" />
                     </template>
                 </Column>
             </DataTable>

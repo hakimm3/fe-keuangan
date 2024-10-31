@@ -70,6 +70,11 @@ const router = createRouter({
                             path: 'roles',
                             name: 'roles',
                             component: () => import('@/views/authorization/Role.vue')
+                        },
+                        {
+                            path: 'roles/:id/permissions',
+                            name: 'role-permissions',
+                            component: () => import('@/views/authorization/RolePermission.vue')
                         }
                     ]
                 }
