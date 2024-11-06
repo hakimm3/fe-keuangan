@@ -6,6 +6,8 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
+        "start": "vite preview",
+        "postinstall": "vite build",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d dist",
         "lint": "eslint --fix . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
