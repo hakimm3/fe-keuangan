@@ -21,5 +21,9 @@ export const RoleService = {
 
     bulkDelete: async (ids) => {
         return await BaseService.bulkDelete(ids, `${API_URL}/bulk-delete`);
+    },
+
+    getPermissions: async (id) => {
+        return await BaseService.getData(API_URL + '/' + id);
     }
 };

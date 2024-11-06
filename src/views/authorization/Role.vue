@@ -1,5 +1,6 @@
 <script setup>
 import { RoleService } from '@/service/authorization/RoleService';
+import { encryptData } from '@/utils/crypto';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
@@ -189,7 +190,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editRole(slotProps.data)" />
                         <Button icon="pi pi-trash" outlined rounded severity="danger mr-2" @click="confirmDeleteRole(slotProps.data)" />
-                        <Button icon="pi pi-lock" outlined rounded severity="info" as="router-link" :to="{ name: 'role-permissions', params: { id: slotProps.data.id } }" />
+                        <Button icon="pi pi-lock" outlined rounded severity="info" as="router-link" :to="{ name: 'role-permissions', params: { id: encryptData(slotProps.data.id) } }" />
                     </template>
                 </Column>
             </DataTable>

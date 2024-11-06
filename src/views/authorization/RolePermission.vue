@@ -1,8 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { RoleService } from '@/service/authorization/RoleService';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const selectedPermissions = ref([]);
-const permissions = ref([
+const test_permissions = ref([
     {
         key: 'master_data',
         label: 'Master Data',
@@ -53,10 +55,26 @@ const permissions = ref([
     }
 ]);
 
+const permissions = ref([]);
+
+const fetchPermissions = async () => {
+    const router = useRouter();
+    // console.log(encryptData(router.currentRoute.value.params.id));
+    console.log(router.currentRoute.value.params.id);
+    // let id = decryptData(router.currentRoute.value.params.id);
+    let id = router.currentRoute.value.params.id;
+    const response = await RoleService.getPermissions(id).then((data) => (permissions.value = data));
+    console.log(response);
+};
+
+onMounted(() => {
+    fetchPermissions();
+});
+
 const breadcrumbItems = ref([{ label: 'Dashboard', to: '/' }, { label: 'Data' }, { label: 'Roles' }, { label: 'Super Admin' }, { label: 'Permissions' }]);
 const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
 </script>
-
+router.currentRoute.value.params.id
 <template>
     <div class="card flex items-center justify-between py-3">
         <h2 class="font-semibold text-2xl">Super Admin</h2>
@@ -64,6 +82,6 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
     </div>
     <div class="card">
         <div class="font-semibold text-xl">Super Admin Permissions</div>
-        <Tree :value="permissions" selectionMode="checkbox" v-model:selection-keys="selectedPermissions" />
+        <Tree :value="test_permissions" selectionMode="checkbox" v-model:selection-keys="selectedPermissions" />
     </div>
 </template>
