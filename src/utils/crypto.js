@@ -1,6 +1,6 @@
 import CryptoJS from 'crypto-js';
 
-const APP_KEY = import.meta.env.VITE_APP_KEY;
+const APP_KEY = import.meta.env.VITE_APP_ENC;
 
 export function encryptData(data) {
     // const iv = CryptoJS.lib.WordArray.random(32);
