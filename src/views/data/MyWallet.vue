@@ -14,7 +14,7 @@ const fetchMyWallets = async () => {
     try {
         isLoading.value = true;
         myWallets.value = await MyWalletService.getData();
-        selectMyWallets.value = await MyWalletService.getData().then((data) => data.map((myWallet) => ({ label: myWallet.wallet.name, value: myWallet })));
+        selectMyWallets.value = await MyWalletService.getData().then((data) => data.map((myWallet) => ({ label: myWallet.description, value: myWallet })));
     } catch (error) {
         console.error(error);
     } finally {
