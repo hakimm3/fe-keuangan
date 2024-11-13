@@ -27,7 +27,7 @@ const fetchExpenseCategories = async () => {
     try {
         isLoading.value = true;
         expenseCategories.value = await ExpenseCategoryService.getData().then((data) => data.map((category) => ({ label: category.name, value: category })));
-        wallets.value = await MyWalletService.getData().then((data) => data.map((wallet) => ({ label: wallet.wallet.name, value: wallet })));
+        wallets.value = await MyWalletService.getData().then((data) => data.map((wallet) => ({ label: wallet.description, value: wallet })));
     } catch (error) {
         console.error(error);
     } finally {
@@ -89,7 +89,7 @@ function hideDialog() {
 
 async function saveExpense() {
     submitted.value = true;
-
+    console.log(expense.value.wallet.value);
     if (expense?.value.description?.trim() && expense?.value.amount) {
         if (expense.value.id) {
             const response = await ExpenseService.update(expense.value.id, {
@@ -111,7 +111,7 @@ async function saveExpense() {
                 amount: expense.value.amount,
                 user_wallet_id: expense.value.wallet.value.id,
                 category: { ...expense.value.category.value },
-                wallet: { ...expense.value.wallet.value.wallet }
+                user_wallet: { ...expense.value.wallet.value }
             };
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Updated', life: 3000 });
         } else {
@@ -133,7 +133,7 @@ async function saveExpense() {
                 amount: expense.value.amount,
                 user_wallet_id: expense.value.wallet.value.id,
                 category: { ...expense.value.category.value },
-                wallet: { ...expense.value.wallet.value.wallet }
+                user_wallet: { ...expense.value.wallet.value }
             });
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Expense Created', life: 3000 });
         }
@@ -267,7 +267,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column field="description" header="Description" sortable></Column>
                 <Column field="category.name" header="Category" sortable></Column>
-                <Column field="wallet.name" header="Wallet" sortable></Column>
+                <Column field="user_wallet.description" header="Wallet" sortable></Column>
                 <Column field="amount" header="Amount" sortable>
                     <template #body="slotProps">
                         {{ formatCurrency(slotProps.data.amount) }}
@@ -286,12 +286,12 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="date" class="block font-bold mb-3">Date</label>
-                    <DatePicker id="date" v-model="expense.date" :invalid="submitted && !expense.date" required="true" showIcon fluid />
+                    <DatePicker id="date" v-model="expense.date" :invalid="submitted && !expense.date" required="true" autofocus showIcon fluid />
                     <small v-if="submitted && !expense.date" class="text-red-500">date is required.</small>
                 </div>
                 <div>
                     <label for="name" class="block font-bold mb-3">Description</label>
-                    <InputText id="description" v-model.trim="expense.description" required="true" autofocus :invalid="submitted && !expense.description" fluid />
+                    <InputText id="description" v-model.trim="expense.description" required="true" :invalid="submitted && !expense.description" fluid />
                     <small v-if="submitted && !expense.description" class="text-red-500">description is required.</small>
                 </div>
                 <div>

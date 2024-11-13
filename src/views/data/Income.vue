@@ -26,7 +26,7 @@ const fetchIncomeCategories = async () => {
     try {
         isLoading.value = true;
         incomeCategories.value = await IncomeCategoryService.getData().then((data) => data.map((category) => ({ label: category.name, value: category })));
-        wallets.value = await MyWalletService.getData().then((data) => data.map((wallet) => ({ label: wallet.wallet.name, value: wallet })));
+        wallets.value = await MyWalletService.getData().then((data) => data.map((wallet) => ({ label: wallet.description, value: wallet })));
     } catch (error) {
         console.error(error);
     } finally {
@@ -111,7 +111,7 @@ async function saveIncome() {
                 amount: income.value.amount,
                 user_wallet_id: income.value.wallet.value.id,
                 category: { ...income.value.category.value },
-                wallet: { ...income.value.wallet.value.wallet }
+                user_wallet: { ...income.value.wallet.value }
             };
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Income Updated', life: 3000 });
         } else {
@@ -135,7 +135,7 @@ async function saveIncome() {
                 amount: income.value.amount,
                 user_wallet_id: income.value.wallet.value.id,
                 category: { ...income.value.category.value },
-                wallet: { ...income.value.wallet.value.wallet }
+                user_wallet: { ...income.value.wallet.value }
             });
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Income Created', life: 3000 });
         }
@@ -269,7 +269,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column field="description" header="Description" sortable></Column>
                 <Column field="category.name" header="Category" sortable></Column>
-                <Column field="wallet.name" header="Wallet" sortable></Column>
+                <Column field="user_wallet.description" header="Wallet" sortable></Column>
                 <Column field="amount" header="Amount" sortable>
                     <template #body="slotProps">
                         {{ formatCurrency(slotProps.data.amount) }}

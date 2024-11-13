@@ -78,8 +78,8 @@ function hideDialog() {
 
 async function saveMyWallet() {
     submitted.value = true;
-
-    if (my_wallet?.value.wallet_id && my_wallet?.value.balance && my_wallet?.value.monthly_fee) {
+    console.log(my_wallet.value);
+    if (my_wallet?.value.wallet_id && my_wallet?.value.balance && my_wallet?.value.monthly_fee >= 0 && my_wallet?.value.description) {
         if (my_wallet.value.id) {
             const response = await MyWalletService.update(my_wallet.value.id, {
                 wallet_id: my_wallet.value.wallet_id.value.id,
@@ -298,12 +298,11 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column field="monthly_fee" header="Monthly Fee" sortable>
                     <template #body="props">
-                        <span>{{ formatCurrency(props.data.monthly_fee) }}</span>
+                        <span>{{ formatCurrency(props.data.monthly_fee) ?? props.data.monthly_fee }}</span>
                     </template>
                 </Column>
                 <Column field="status" header="Status" sortable>
                     <template #body="props">
-                        <!-- badge -->
                         <Badge :severity="props.data.status ? 'success' : 'danger'">{{ props.data.status ? 'Active' : 'Inactive' }}</Badge>
                     </template>
                 </Column>
@@ -320,21 +319,22 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="wallet" class="block font-bold mb-3">Wallet</label>
-                    <Select id="wallet_id" v-model="my_wallet.wallet_id" :options="wallets" optionLabel="label" placeholder="Select a Category" required="true" :invalid="submitted && !my_wallet.wallet_id" fluid></Select>
+                    <Select id="wallet_id" v-model="my_wallet.wallet_id" :options="wallets" optionLabel="label" placeholder="Select a Wallet" required="true" :invalid="submitted && !my_wallet.wallet_id" fluid></Select>
                     <small v-if="submitted && !my_wallet.wallet_id" class="text-red-500">Wallet is required.</small>
                 </div>
                 <div>
                     <label for="date" class="block font-bold mb-3">Description</label>
-                    <InputText id="description" v-model.trim="my_wallet.description" required="true" fluid />
+                    <InputText id="description" v-model.trim="my_wallet.description" required="true" :invalid="submitted && !my_wallet.description" fluid />
+                    <small v-if="submitted && !my_wallet.description" class="text-red-500">Description is required.</small>
                 </div>
                 <div>
                     <label for="name" class="block font-bold mb-3">Balance</label>
                     <InputNumber id="balance" v-model.trim="my_wallet.balance" required="true" autofocus :invalid="submitted && !my_wallet.balance" fluid />
-                    <small v-if="submitted && !my_wallet.balance" class="text-red-500">description is required.</small>
+                    <small v-if="submitted && !my_wallet.balance" class="text-red-500">Balance is required.</small>
                 </div>
                 <div>
                     <label for="price" class="block font-bold mb-3">Monthly Fee</label>
-                    <InputNumber id="monthly_fee" v-model.trim="my_wallet.monthly_fee" required="true" :invalid="submitted && !my_wallet.monthly_fee" fluid />
+                    <InputNumber id="monthly_fee" v-model.trim="my_wallet.monthly_fee" required="true" :invalid="submitted && my_wallet.monthly_fee < 0" fluid />
                     <small v-if="submitted && !my_wallet.monthly_fee" class="text-red-500">Monthly fee is required.</small>
                 </div>
                 <div>
