@@ -21,5 +21,9 @@ export const MyWalletService = {
 
     bulkDelete: async (ids) => {
         return await BaseService.bulkDelete(ids, `${API_URL}/bulk-delete`);
+    },
+
+    topUp: async (data) => {
+        return await BaseService.create(data, `${API_URL}/top-up`);
     }
 };

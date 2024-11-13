@@ -7,12 +7,14 @@ import { onMounted, ref } from 'vue';
 
 const myWallets = ref();
 const wallets = ref();
+const selectMyWallets = ref();
 const isLoading = ref(false);
 
 const fetchMyWallets = async () => {
     try {
         isLoading.value = true;
         myWallets.value = await MyWalletService.getData();
+        selectMyWallets.value = await MyWalletService.getData().then((data) => data.map((myWallet) => ({ label: myWallet.wallet.name, value: myWallet })));
     } catch (error) {
         console.error(error);
     } finally {
@@ -42,8 +44,10 @@ const dt = ref();
 const expenseDialog = ref(false);
 const deleteExpenseDialog = ref(false);
 const deleteMyWalletsDialog = ref(false);
+const topupDialog = ref(false);
 
 const my_wallet = ref({});
+const topup = ref({});
 
 const selectedMyWallets = ref();
 
@@ -128,6 +132,57 @@ async function saveMyWallet() {
     }
 }
 
+async function submitTopup() {
+    submitted.value = true;
+
+    if (topup.value?.wallet_source_id && topup.value?.wallet_destionation_id && topup.value?.admin_fee && topup.value?.amount) {
+        const response = MyWalletService.topUp({
+            wallet_source_id: topup.value.wallet_source_id.value.id,
+            wallet_destionation_id: topup.value.wallet_destionation_id.value.id,
+            amount: topup.value.amount,
+            admin_fee: topup.value.admin_fee,
+            date: topup.value.date
+        });
+
+        if (response.status === 422) {
+            showToastError(response.data.message);
+            return;
+        }
+
+        toast.add({ severity: 'success', summary: 'Successful', detail: 'Top Up Successful', life: 300 });
+        topupDialog.value = false;
+        submitted.value = false;
+        updateWalletsAfterTopUp();
+        topup.value = {};
+    }
+}
+
+function updateWalletsAfterTopUp() {
+    let sourceWalletId = topup.value.wallet_source_id?.value.id;
+    let destinationWalletId = topup.value.wallet_destionation_id.value.id;
+    let amount = topup.value.amount;
+    let admin_fee = topup.value.admin_fee;
+    // Find indexes of the source and destination wallets
+    const sourceIndex = findIndexById(sourceWalletId);
+    const destinationIndex = findIndexById(destinationWalletId);
+
+    if (destinationIndex !== -1 && sourceIndex !== -1) {
+        // Deduct from source wallet
+        myWallets.value[sourceIndex] = {
+            ...myWallets.value[sourceIndex],
+            balance: myWallets.value[sourceIndex].balance - admin_fee - amount
+        };
+
+        // Add to destination wallet
+        myWallets.value[destinationIndex] = {
+            ...myWallets.value[destinationIndex],
+            balance: myWallets.value[destinationIndex].balance + amount
+        };
+    } else {
+        console.error('Source or destination wallet not found');
+    }
+}
+
 function editMyWallet(exp) {
     my_wallet.value = {
         id: exp.id,
@@ -199,6 +254,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <Toolbar class="mb-6">
                 <template #start>
                     <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
+                    <Button label="Top Up" icon="pi pi-upload" severity="secondary" class="mx-2" @click="topupDialog = true" />
                     <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedMyWallets || !selectedMyWallets.length" />
                     <Button label="Transaction History" icon="pi pi-list" severity="secondary" class="ml-2" as="router-link" :to="{ name: 'myWalletTransactions' }" />
                 </template>
@@ -327,6 +383,50 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <template #footer>
                 <Button label="No" icon="pi pi-times" text @click="deleteMyWalletsDialog = false" />
                 <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedWallets" />
+            </template>
+        </Dialog>
+
+        <Dialog v-model:visible="topupDialog" :style="{ width: '450px' }" header="Top Up Wallet" :modal="true">
+            <div class="flex flex-col gap-6">
+                <div>
+                    <label for="wallet" class="block font-bold mb-3">Wallet Source</label>
+                    <Select id="wallet_source_id" v-model="topup.wallet_source_id" :options="selectMyWallets" optionLabel="label" placeholder="Select a Wallet" required="true" :invalid="submitted && !topup.wallet_source_id" fluid autofocus></Select>
+                    <small v-if="submitted && !topup.wallet_source_id" class="text-red-500">Wallet Source is required.</small>
+                </div>
+                <div>
+                    <label for="date" class="block font-bold mb-3">Wallet Destionation</label>
+                    <Select
+                        id="wallet_destionation_id"
+                        v-model="topup.wallet_destionation_id"
+                        :options="selectMyWallets"
+                        optionLabel="label"
+                        placeholder="Select a Wallet"
+                        required="true"
+                        :invalid="submitted && !topup.wallet_destionation_id"
+                        fluid
+                    ></Select>
+                    <small v-if="submitted && !topup.wallet_destionation_id" class="text-red-500">Wallet Destionation is required.</small>
+                </div>
+                <div>
+                    <label for="name" class="block font-bold mb-3">Amount</label>
+                    <InputNumber id="amount" v-model.trim="topup.amount" required="true" :invalid="submitted && !topup.amount" fluid />
+                    <small v-if="submitted && !topup.amount" class="text-red-500">Amount is required.</small>
+                </div>
+                <div>
+                    <label for="name" class="block font-bold mb-3">Admin Fee</label>
+                    <InputNumber id="admin_fee" v-model.trim="topup.admin_fee" :invalid="submitted && !topup.admin_fee" required="true" fluid="" />
+                    <small v-if="submitted && !topup.admin_fee" class="text-red-500">Date is required.</small>
+                </div>
+                <div>
+                    <label for="date">Date</label>
+                    <DatePicker id="date" v-model="topup.date" :invalid="submitted && !topup.date" required="true" fluid />
+                    <small v-if="submitted && !topup.date" class="text-red-500">Date is required.</small>
+                </div>
+            </div>
+
+            <template #footer>
+                <Button label="Cancel" icon="pi pi-times" text @click="topupDialog = false" />
+                <Button label="Save" icon="pi pi-check" @click="submitTopup" />
             </template>
         </Dialog>
     </div>
