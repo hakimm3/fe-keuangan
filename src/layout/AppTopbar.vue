@@ -19,7 +19,6 @@ const goToProfile = () => {
 
 const logout = () => {
     profileDropdownVisible.value = false;
-    console.log('logout');
     auth.logout();
 };
 </script>

@@ -1,25 +1,12 @@
 import { computed, reactive, readonly } from 'vue';
 
-const Storage = {
-    get(key) {
-        return localStorage.getItem(key);
-    },
-    set(key, value) {
-        localStorage.setItem(key, value);
-    }
-};
-
 const layoutConfig = reactive({
     preset: 'Aura',
     primary: 'emerald',
     surface: null,
-    darkTheme: Storage.get('darkTheme') === 'true',
+    darkTheme: false,
     menuMode: 'static'
 });
-
-function saveToStorage(key, value) {
-    Storage.set(key, value);
-}
 
 const layoutState = reactive({
     staticMenuDesktopInactive: false,
@@ -61,7 +48,6 @@ const toggleDarkMode = () => {
 };
 
 const executeDarkModeToggle = () => {
-    saveToStorage('darkTheme', !layoutConfig.darkTheme);
     layoutConfig.darkTheme = !layoutConfig.darkTheme;
     document.documentElement.classList.toggle('app-dark');
 };
@@ -87,6 +73,7 @@ const resetMenu = () => {
 const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
 
 const isDarkTheme = computed(() => layoutConfig.darkTheme);
+console.log(isDarkTheme.value);
 
 const getPrimary = computed(() => layoutConfig.primary);
 
