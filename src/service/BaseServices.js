@@ -4,12 +4,13 @@ import axios from 'axios';
 // const API_URL = 'http://backend.keuangan.net/api/spendings';
 
 export const BaseService = {
-    getData: async (API_URL) => {
+    getData: async (API_URL, data = {}) => {
         try {
             const response = await axios.get(API_URL, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
+                },
+                params: data
             });
             return response.data.data;
         } catch (error) {

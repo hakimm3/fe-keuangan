@@ -72,7 +72,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             >
                 <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
-                        <h4 class="m-0">Manage My Wallets</h4>
+                        <h4 class="m-0">My Wallets Transaction</h4>
                         <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
@@ -82,7 +82,6 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                     </div>
                 </template>
 
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
                 <Column field="user_wallet.wallet.name" header="Wallet" sortable></Column>
                 <Column field="type" header="Type" sortable>
                     <template #body="props">

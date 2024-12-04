@@ -232,7 +232,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </template>
 
                 <template #end>
-                    <Button label="Import" icon="pi pi-download" severity="secondary mx-2" @click="importIncomesDialog = true" />
+                    <Button label="Import" icon="pi pi-download" severity="secondary mr-2" @click="importIncomesDialog = true" />
                     <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
             </Toolbar>

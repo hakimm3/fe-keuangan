@@ -13,7 +13,8 @@ const model = ref([
         items: [
             { label: 'Incomes', icon: 'pi pi-fw pi-money-bill', to: '/data/incomes', permission: 'data-incomes-read' },
             { label: 'Expenses', icon: 'pi pi-fw pi-money-bill', to: '/data/expenses', permission: 'data-expenses-read' },
-            { label: 'My Wallets', icon: 'pi pi-fw pi-wallet', to: '/data/my-wallets', permission: 'data-my-wallets-read' }
+            { label: 'My Wallets', icon: 'pi pi-fw pi-wallet', to: '/data/my-wallets', permission: 'data-my-wallets-read' },
+            { label: 'Budget', icon: 'pi pi-fw pi-chart-line', to: '/data/budget', permission: 'data-expenses-read' }
         ]
     },
     {
