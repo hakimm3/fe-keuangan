@@ -5,13 +5,22 @@ import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watch } from 'vue';
 
 const budgets = ref();
+const total_budget = ref(0);
 const isLoading = ref(false);
 
 const fetchBudgets = async () => {
     try {
         isLoading.value = true;
-        budgets.value = await BudgetServices.getData({ month: dropdownValue.value.name, year: new Date().getFullYear() });
-        console.log(budgets.value);
+        budgets.value = await BudgetServices.getData({
+            month: dropdownValue.value.name,
+            year: new Date().getFullYear()
+        });
+
+        // Calculate total budget after fetching data
+        total_budget.value = budgets.value.reduce((total, item) => {
+            return total + (item.budget?.amount || 0); // Handle null/undefined values
+        }, 0);
+        console.log(total_budget.value);
     } catch (error) {
         console.error(error);
     } finally {
@@ -21,6 +30,7 @@ const fetchBudgets = async () => {
 
 onMounted(() => {
     fetchBudgets();
+    // getTotalBudget();
 });
 
 const toast = useToast();
@@ -58,12 +68,20 @@ async function updateBudget(value) {
             amount: value.budget.amount
         });
         toast.add({ severity: 'success', summary: 'Success', detail: 'Budget updated', life: 3000 });
+
+        // add total budget
+        total_budget.value += value.budget.amount;
     }
 }
 
 watch(dropdownValue, (newValue) => {
     fetchBudgets({ code: newValue.code });
 });
+
+function formatCurrency(value) {
+    if (value > 0) return value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
+    return value;
+}
 
 const breadcrumbItems = ref([{ label: 'Dashboard', to: '/' }, { label: 'Data' }, { label: 'Buget' }]);
 const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
@@ -82,7 +100,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             </template>
 
             <template #end>
-                <Button label="Template" icon="pi pi-palette" severity="secondary" @click="exportCSV($event)" />
+                <Button :label="'Total Budget ' + formatCurrency(total_budget)" icon="pi pi-palette" severity="secondary" />
             </template>
         </Toolbar>
         <DataTable
