@@ -30,7 +30,7 @@ async function getDashboardData() {
     total_income_this_month.value = dashboardData.value.data.total_income_this_month;
     total_money_in_all_wallet.value = dashboardData.value.data.total_money_in_all_wallet;
 
-    expenseStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.expense_stream_by_month);
+    expenseStreamByMonth.value = convertToStackedChartDataWithBudget(dashboardData.value.data.expense_stream_by_month);
     incomeStreamByMonth.value = convertToStackedChartData(dashboardData.value.data.income_stream_by_month);
     incomeVsExpenseByMonth.value = convertToLineData(dashboardData.value.data.income_vs_expense_by_month);
     expenseByWallet.value = convertToPieData(dashboardData.value.data.expense_by_wallet);
@@ -58,6 +58,50 @@ function convertToStackedChartData(data) {
         });
     });
 
+    return {
+        labels,
+        datasets
+    };
+}
+
+function convertToStackedChartDataWithBudget(data) {
+    const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const labels = Object.keys(data).sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
+    const datasets = [];
+    const categoryTotals = {};
+
+    labels.forEach((month) => {
+        data[month].forEach((item) => {
+            if (!categoryTotals[item.category]) {
+                categoryTotals[item.category] = {
+                    label: `${item.category}`,
+                    data: Array(labels.length).fill(0),
+                    borderColor: generateColor(),
+                    backgroundColor: generateColor(),
+                    stack: 'combined',
+                    type: 'bar',
+                    order: 1
+                };
+
+                // budget
+                if (item.category === 'budget') {
+                    categoryTotals[item.category] = {
+                        label: `${item.category}`,
+                        data: Array(labels.length).fill(0),
+                        borderColor: 'green',
+                        backgroundColor: 'green',
+                        type: 'line',
+                        order: 0,
+                        tension: 0.4
+                    };
+                }
+
+                datasets.push(categoryTotals[item.category]);
+            }
+            const monthIndex = labels.indexOf(month);
+            categoryTotals[item.category].data[monthIndex] = item.total;
+        });
+    });
     return {
         labels,
         datasets
@@ -94,6 +138,7 @@ function setChartOptions() {
             },
             y: {
                 stacked: true,
+                beginAtZero: true,
                 ticks: {
                     color: textMutedColor
                 },
