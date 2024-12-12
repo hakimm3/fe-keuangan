@@ -125,6 +125,19 @@ function setChartOptions() {
     return {
         maintainAspectRatio: false,
         aspectRatio: 0.8,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    footer: (tooltipItems) => {
+                        let sum = 0;
+                        tooltipItems.forEach((tooltipItem) => {
+                            sum += tooltipItem.parsed.y;
+                        });
+                        return `Total: ${sum.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`;
+                    }
+                }
+            }
+        },
         scales: {
             x: {
                 stacked: true,
