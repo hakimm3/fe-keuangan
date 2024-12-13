@@ -1,8 +1,8 @@
 import { BaseService } from '../BaseServices';
 
-const API_URL = import.meta.env.VITE_BASE_URL + 'authorization/roles';
+const API_URL = import.meta.env.VITE_BASE_URL + 'authorization/permissions';
 
-export const RoleService = {
+export const PermissionService = {
     getData: async () => {
         return await BaseService.getData(API_URL);
     },
@@ -25,9 +25,5 @@ export const RoleService = {
 
     getPermissions: async (id) => {
         return await BaseService.getData(API_URL + '/' + id);
-    },
-
-    syncPermissions: async (data) => {
-        return await BaseService.create(data, `${API_URL}/sync-permissions`);
     }
 };

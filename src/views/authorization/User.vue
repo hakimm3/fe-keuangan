@@ -205,7 +205,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="User Category Details" :modal="true">
+        <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="User Details" :modal="true">
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="name" class="block font-bold mb-3">Name</label>

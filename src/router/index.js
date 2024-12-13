@@ -80,6 +80,11 @@ const router = createRouter({
                             path: 'roles/:id/permissions',
                             name: 'role-permissions',
                             component: () => import('@/views/authorization/RolePermission.vue')
+                        },
+                        {
+                            path: 'permissions',
+                            name: 'permissions',
+                            component: () => import('@/views/authorization/Permission.vue')
                         }
                     ]
                 }

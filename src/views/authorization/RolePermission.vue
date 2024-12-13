@@ -1,25 +1,97 @@
 <script setup>
+import { PermissionService } from '@/service/authorization/PermissionService';
 import { RoleService } from '@/service/authorization/RoleService';
 import { decryptData } from '@/utils/crypto';
-import { onMounted, ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+const toast = useToast();
+const router = useRouter();
 const selectedPermissions = ref([]);
 
-const permissions = ref([]);
+const rolePermissions = ref([]);
+const allPermissions = ref([]);
 
 const fetchPermissions = async () => {
-    const router = useRouter();
     let id = decryptData(router.currentRoute.value.params.id);
-    const response = await RoleService.getPermissions(id).then((data) => (permissions.value = data));
+    const response = await RoleService.getPermissions(id).then((data) => (rolePermissions.value = data));
+    const responseAllPermission = await PermissionService.getData().then((data) => (allPermissions.value = data));
 
-    permissions.value = transformData(response.permissions);
-    console.log(permissions.value);
+    rolePermissions.value = transformData(response.permissions);
+    allPermissions.value = transformData(responseAllPermission);
+    console.log(rolePermissions.value);
+
+    initializeSelectedPermissions();
 };
+
+function updatePermissions() {
+    const selected = Object.keys(selectedPermissions.value).filter((key) => selectedPermissions.value[key].checked && key.split('-').length === 3);
+    const permissions = selected.map((key) => ({ name: key }));
+
+    RoleService.syncPermissions({
+        role_id: decryptData(router.currentRoute.value.params.id),
+        permissions: permissions
+    });
+    toast.add({ severity: 'success', summary: 'Success', detail: 'Permissions updated', life: 3000 });
+}
 
 onMounted(() => {
     fetchPermissions();
 });
+
+function initializeSelectedPermissions() {
+    const keys = {};
+
+    // Helper function to check if a permission exists in rolePermissions
+    function permissionExistsInRolePermissions(permissionKey) {
+        return rolePermissions.value.some((category) => category.children.some((subcategory) => subcategory.children.some((permission) => permission.key === permissionKey)));
+    }
+
+    // Recursive function to traverse and set checked states in allPermissions
+    function traverseAndSetState(node) {
+        if (node.children && node.children.length > 0) {
+            let allChecked = true;
+            let anyChecked = false;
+
+            node.children.forEach((child) => {
+                const childState = traverseAndSetState(child); // Recursively set state for children
+
+                if (childState.checked) {
+                    anyChecked = true;
+                } else if (childState.partialChecked) {
+                    anyChecked = true;
+                    allChecked = false;
+                } else {
+                    allChecked = false;
+                }
+            });
+
+            // Set current node's state
+            if (allChecked) {
+                keys[node.key] = { checked: true, partialChecked: false };
+            } else if (anyChecked) {
+                keys[node.key] = { checked: false, partialChecked: true };
+            } else {
+                keys[node.key] = { checked: false, partialChecked: false };
+            }
+
+            return keys[node.key];
+        } else {
+            // Leaf node: check if it exists in rolePermissions
+            const isChecked = permissionExistsInRolePermissions(node.key);
+            keys[node.key] = { checked: isChecked, partialChecked: false };
+            return keys[node.key];
+        }
+    }
+
+    // Start traversal from allPermissions
+    allPermissions.value.forEach((category) => {
+        traverseAndSetState(category);
+    });
+
+    selectedPermissions.value = keys; // Populate selectedPermissions
+}
 
 function transformData(dataArray) {
     const result = [];
@@ -50,11 +122,15 @@ function transformData(dataArray) {
         const subcategory = findOrCreateCategory(category.children, `${categoryKey}-${subcategoryKey}`, subcategoryLabel);
 
         // Add the action as a child of the subcategory
-        subcategory.children.push({ id: item.id, label: actionLabel, key: item.name });
+        subcategory.children.push({ id: item.id, label: actionLabel, key: item.name, expanded: true });
     });
 
     return result;
 }
+
+watch(selectedPermissions, (value) => {
+    console.log(value);
+});
 
 const breadcrumbItems = ref([{ label: 'Dashboard', to: '/' }, { label: 'Data' }, { label: 'Roles' }, { label: 'Super Admin' }, { label: 'Permissions' }]);
 const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
@@ -66,6 +142,6 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
     </div>
     <div class="card">
         <div class="font-semibold text-xl">Super Admin Permissions</div>
-        <Tree :value="permissions" selectionMode="checkbox" v-model:selection-keys="selectedPermissions" />
+        <Tree :value="allPermissions" selectionMode="checkbox" v-model:selection-keys="selectedPermissions" v-on:update:selection-keys="updatePermissions" />
     </div>
 </template>

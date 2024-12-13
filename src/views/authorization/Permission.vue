@@ -1,18 +1,17 @@
 <script setup>
-import { RoleService } from '@/service/authorization/RoleService';
-import { encryptData } from '@/utils/crypto';
+import { PermissionService } from '@/service/authorization/PermissionService';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 
-const role = ref();
-const roles = ref();
+const permission = ref();
+const permissions = ref();
 const isLoading = ref(false);
 
-const fetchRoles = async () => {
+const fetchPermissions = async () => {
     try {
         isLoading.value = true;
-        roles.value = await RoleService.getData();
+        permissions.value = await PermissionService.getData();
     } catch (error) {
         console.error(error);
     } finally {
@@ -21,7 +20,7 @@ const fetchRoles = async () => {
 };
 
 onMounted(() => {
-    fetchRoles();
+    fetchPermissions();
 });
 
 const toast = useToast();
@@ -38,7 +37,7 @@ const filters = ref({
 const submitted = ref(false);
 
 function openNew() {
-    role.value = {};
+    permission.value = {};
     submitted.value = false;
     roleDialog.value = true;
 }
@@ -51,10 +50,10 @@ function hideDialog() {
 async function saveRole() {
     submitted.value = true;
 
-    if (role?.value.name) {
-        if (role.value.id) {
-            const response = await RoleService.update(role.value.id, {
-                name: role.value.name
+    if (permission?.value.name) {
+        if (permission.value.id) {
+            const response = await PermissionService.update(permission.value.id, {
+                name: permission.value.name
             });
 
             if (response.status === 422) {
@@ -62,28 +61,28 @@ async function saveRole() {
                 return;
             }
 
-            roles.value[findIndexById(role.value.id)] = { ...response.data };
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Roles Updated', life: 3000 });
+            permissions.value[findIndexById(permission.value.id)] = { ...response.data };
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Permissions Updated', life: 3000 });
         } else {
-            const response = await RoleService.create({
-                name: role.value.name
+            const response = await PermissionService.create({
+                name: permission.value.name
             });
 
             if (response.status === 422) {
                 toast.add({ severity: 'error', summary: 'Error', detail: response.data.message, life: 3000 });
                 return;
             }
-            roles.value.unshift(response.data);
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Roles Created', life: 3000 });
+            permissions.value.unshift(response.data);
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Permissions Created', life: 3000 });
         }
 
         roleDialog.value = false;
-        role.value = {};
+        permission.value = {};
     }
 }
 
 function editRole(exp) {
-    role.value = {
+    permission.value = {
         id: exp.id,
         name: exp.name,
         description: exp.description
@@ -92,23 +91,23 @@ function editRole(exp) {
 }
 
 function confirmDeleteRole(exp) {
-    role.value = exp;
+    permission.value = exp;
     deleteRoleDialog.value = true;
 }
 
 function deleteRole() {
-    RoleService.delete(role.value.id);
+    PermissionService.delete(permission.value.id);
 
-    roles.value = roles.value.filter((val) => val.id !== role.value.id);
+    permissions.value = permissions.value.filter((val) => val.id !== permission.value.id);
     deleteRoleDialog.value = false;
-    role.value = {};
+    permission.value = {};
     toast.add({ severity: 'success', summary: 'Successful', detail: 'Role Deleted', life: 3000 });
 }
 
 function findIndexById(id) {
     let index = -1;
-    for (let i = 0; i < roles.value.length; i++) {
-        if (roles.value[i].id === id) {
+    for (let i = 0; i < permissions.value.length; i++) {
+        if (permissions.value[i].id === id) {
             index = i;
             break;
         }
@@ -128,21 +127,21 @@ function confirmDeleteSelected() {
 function deleteSelectedRoles() {
     let ids = selectedRoles.value.map((exp) => exp.id);
     // console.log({ ids: ids });
-    RoleService.bulkDelete({ ids: ids });
-    roles.value = roles.value.filter((val) => !ids.includes(val.id));
+    PermissionService.bulkDelete({ ids: ids });
+    permissions.value = permissions.value.filter((val) => !ids.includes(val.id));
 
     deleteRolesDialog.value = false;
     selectedRoles.value = null;
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Roles Deleted', life: 3000 });
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'Permissions Deleted', life: 3000 });
 }
 
-const breadcrumbItems = ref([{ label: 'Dashboard', to: '/' }, { label: 'Data' }, { label: 'Roles' }]);
+const breadcrumbItems = ref([{ label: 'Dashboard', to: '/' }, { label: 'Data' }, { label: 'Permissions' }]);
 const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
 </script>
 
 <template>
     <div class="card flex items-center justify-between py-3">
-        <h2 class="font-semibold text-2xl">Roles</h2>
+        <h2 class="font-semibold text-2xl">Permissions</h2>
         <Breadcrumb :home="breadcrumbHome" :model="breadcrumbItems" />
     </div>
     <div>
@@ -162,18 +161,18 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <DataTable
                 ref="dt"
                 v-model:selection="selectedRoles"
-                :value="roles"
+                :value="permissions"
                 dataKey="id"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} roles"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} permissions"
             >
                 <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
-                        <h4 class="m-0">Manage Roles</h4>
+                        <h4 class="m-0">Manage Permissions</h4>
                         <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
@@ -190,7 +189,6 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                     <template #body="slotProps">
                         <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editRole(slotProps.data)" />
                         <Button icon="pi pi-trash" outlined rounded severity="danger mr-2" @click="confirmDeleteRole(slotProps.data)" />
-                        <Button icon="pi pi-lock" outlined rounded severity="info" as="router-link" :to="{ name: 'role-permissions', params: { id: encryptData(slotProps.data.id) } }" />
                     </template>
                 </Column>
             </DataTable>
@@ -200,8 +198,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="name" class="block font-bold mb-3">Name</label>
-                    <InputText id="name" v-model.trim="role.name" required="true" autofocus :invalid="submitted && !role.name" fluid />
-                    <small v-if="submitted && !role.name" class="text-red-500">name is required.</small>
+                    <InputText id="name" v-model.trim="permission.name" required="true" autofocus :invalid="submitted && !permission.name" fluid />
+                    <small v-if="submitted && !permission.name" class="text-red-500">name is required.</small>
                 </div>
             </div>
 
@@ -214,8 +212,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <Dialog v-model:visible="deleteRoleDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
                 <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="role"
-                    >Are you sure you want to delete <b>{{ role.name }}</b
+                <span v-if="permission"
+                    >Are you sure you want to delete <b>{{ permission.name }}</b
                     >?</span
                 >
             </div>
@@ -228,7 +226,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <Dialog v-model:visible="deleteRolesDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
                 <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="selectedRoles">Are you sure you want to delete the selected roles?</span>
+                <span v-if="selectedRoles">Are you sure you want to delete the selected permissions?</span>
             </div>
             <template #footer>
                 <Button label="No" icon="pi pi-times" text @click="deleteRolesDialog = false" />

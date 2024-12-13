@@ -1,6 +1,7 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { DashboardService } from '@/service/dashboard/DashboardService';
+import { toTokenKey } from '@primevue/themes';
 import { onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
@@ -129,9 +130,12 @@ function setChartOptions() {
             tooltip: {
                 callbacks: {
                     footer: (tooltipItems) => {
-                        let sum = 0;
+                        let budget = toTokenKey(tooltipItems[0].dataset.label) === 'budget' ? tooltipItems[0].parsed.y : 0;
+                        let sum = 0 - budget;
                         tooltipItems.forEach((tooltipItem) => {
-                            sum += tooltipItem.parsed.y;
+                            if (tooltipItem != 'budget') {
+                                sum += tooltipItem.parsed.y;
+                            }
                         });
                         return `Total: ${sum.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`;
                     }
