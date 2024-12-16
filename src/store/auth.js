@@ -21,7 +21,6 @@ export const authStore = defineStore('auth', () => {
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 localStorage.setItem('token', response.data.token);
                 permissionsStore.setPermissions(response.data.permissions);
-                console.log(response.data.permissions);
                 router.push('/');
             }
             return response.data;

@@ -1,4 +1,4 @@
-import { createApp } from 'vue';
+import { createApp, watch } from 'vue';
 import App from './App.vue';
 import router from './router';
 
@@ -31,17 +31,47 @@ app.use(createPinia());
 const permissionsStore = usePermissionsStore();
 
 app.directive('can', {
-    beforeMount(el, binding) {
-        if (!permissionsStore.can(binding.value)) {
-            el.style.display = 'none';
+    mounted(el, binding) {
+        // Update visibility function
+        const updateVisibility = () => {
+            el.style.display = permissionsStore.can(binding.value) ? '' : 'none';
+        };
+
+        // Run initially
+        updateVisibility();
+
+        // Watch for changes in permissions
+        const stopWatcher = watch(
+            () => permissionsStore.permissions,
+            updateVisibility,
+            { deep: true } // Track deeply nested changes
+        );
+
+        // Cleanup watcher
+        el._stopWatcher = stopWatcher;
+    },
+    unmounted(el) {
+        if (el._stopWatcher) {
+            el._stopWatcher();
         }
     }
 });
 
 app.directive('canany', {
-    beforeMount(el, binding) {
-        if (!permissionsStore.canAny(binding.value)) {
-            el.style.display = 'none';
+    mounted(el, binding) {
+        const updateVisibility = () => {
+            el.style.display = permissionsStore.canAny(binding.value) ? '' : 'none';
+        };
+
+        updateVisibility();
+
+        const stopWatcher = watch(() => permissionsStore.permissions, updateVisibility, { deep: true });
+
+        el._stopWatcher = stopWatcher;
+    },
+    unmounted(el) {
+        if (el._stopWatcher) {
+            el._stopWatcher();
         }
     }
 });

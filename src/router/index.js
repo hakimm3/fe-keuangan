@@ -108,9 +108,6 @@ router.beforeEach((to, from, next) => {
     } else if (loggedIn && publicPages.includes(to.path)) {
         return next('/');
     }
-    //  else if (to.matched.length === 0) {
-    //     return next('/pages/notfound');
-    // }
     next();
 });
 

@@ -73,7 +73,6 @@ const resetMenu = () => {
 const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
 
 const isDarkTheme = computed(() => layoutConfig.darkTheme);
-console.log(isDarkTheme.value);
 
 const getPrimary = computed(() => layoutConfig.primary);
 

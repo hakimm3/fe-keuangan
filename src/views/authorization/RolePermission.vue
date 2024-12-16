@@ -1,13 +1,15 @@
 <script setup>
 import { PermissionService } from '@/service/authorization/PermissionService';
 import { RoleService } from '@/service/authorization/RoleService';
+import { usePermissionsStore } from '@/store/permissions';
 import { decryptData } from '@/utils/crypto';
 import { useToast } from 'primevue/usetoast';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const toast = useToast();
 const router = useRouter();
+const permissionsStore = usePermissionsStore();
 const selectedPermissions = ref([]);
 
 const rolePermissions = ref([]);
@@ -20,20 +22,21 @@ const fetchPermissions = async () => {
 
     rolePermissions.value = transformData(response.permissions);
     allPermissions.value = transformData(responseAllPermission);
-    console.log(rolePermissions.value);
 
     initializeSelectedPermissions();
 };
 
-function updatePermissions() {
+async function updatePermissions() {
     const selected = Object.keys(selectedPermissions.value).filter((key) => selectedPermissions.value[key].checked && key.split('-').length === 3);
     const permissions = selected.map((key) => ({ name: key }));
 
-    RoleService.syncPermissions({
+    const resp = await RoleService.syncPermissions({
         role_id: decryptData(router.currentRoute.value.params.id),
         permissions: permissions
     });
+
     toast.add({ severity: 'success', summary: 'Success', detail: 'Permissions updated', life: 3000 });
+    permissionsStore.setPermissions(resp.permissions);
 }
 
 onMounted(() => {
@@ -127,10 +130,6 @@ function transformData(dataArray) {
 
     return result;
 }
-
-watch(selectedPermissions, (value) => {
-    console.log(value);
-});
 
 const breadcrumbItems = ref([{ label: 'Dashboard', to: '/' }, { label: 'Data' }, { label: 'Roles' }, { label: 'Super Admin' }, { label: 'Permissions' }]);
 const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
