@@ -227,12 +227,12 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <div class="card">
             <Toolbar class="mb-6">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedIncomes || !selectedIncomes.length" />
+                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" v-can="'data-incomes-create'" />
+                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedIncomes || !selectedIncomes.length" v-can="'data-incomes-delete'" />
                 </template>
 
                 <template #end>
-                    <Button label="Import" icon="pi pi-download" severity="secondary mr-2" @click="importIncomesDialog = true" />
+                    <Button label="Import" icon="pi pi-download" severity="secondary mr-2" @click="importIncomesDialog = true" v-can="'data-incomes-create'" />
                     <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
             </Toolbar>
@@ -277,8 +277,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column :exportable="false" style="min-width: 12rem">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editIncome(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteIncome(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editIncome(slotProps.data)" v-can="'data-incomes-update'" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteIncome(slotProps.data)" v-can="'data-incomes-delete'" />
                     </template>
                 </Column>
             </DataTable>

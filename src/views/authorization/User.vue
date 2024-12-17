@@ -159,12 +159,12 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <div class="card">
             <Toolbar class="mb-6">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedUsers || !selectedUsers.length" />
+                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" v-can="'auth-users-create'" />
+                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedUsers || !selectedUsers.length" v-can="'auth-users-delete'" />
                 </template>
 
                 <template #end>
-                    <Button label="Import" icon="pi pi-download" severity="secondary mx-2" @click="importExpenseCategoryDialog = true" />
+                    <Button label="Import" icon="pi pi-download" severity="secondary mx-2" @click="importExpenseCategoryDialog = true" v-can="'auth-users-create'" />
                     <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
             </Toolbar>
@@ -198,8 +198,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 <Column field="email" header="Email" sortable></Column>
                 <Column :exportable="false">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editUser(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteUser(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editUser(slotProps.data)" v-can="'auth-users-update'" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteUser(slotProps.data)" v-can="'auth-users-delete'" />
                     </template>
                 </Column>
             </DataTable>

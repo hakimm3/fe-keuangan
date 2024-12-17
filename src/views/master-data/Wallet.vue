@@ -158,8 +158,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <div class="card">
             <Toolbar class="mb-6">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedWallets || !selectedWallets.length" />
+                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" v-can="'master data-wallets-create'" />
+                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedWallets || !selectedWallets.length" v-can="'master data-wallets-delete'" />
                 </template>
 
                 <template #end>
@@ -198,8 +198,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column :exportable="false">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editIncomeCategory(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteWallet(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editIncomeCategory(slotProps.data)" v-can="'master data-wallets-update'" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteWallet(slotProps.data)" v-can="'master data-wallets-delete'" />
                     </template>
                 </Column>
             </DataTable>

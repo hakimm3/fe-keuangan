@@ -149,12 +149,12 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <div class="card">
             <Toolbar class="mb-6">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedRoles || !selectedRoles.length" />
+                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" v-can="'auth-roles-create'" />
+                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedRoles || !selectedRoles.length" v-can="'auth-roles-delete'" />
                 </template>
 
                 <template #end>
-                    <Button label="Import" icon="pi pi-download" severity="secondary mx-2" @click="importIncomeCategoryDialog = true" />
+                    <Button label="Import" icon="pi pi-download" severity="secondary mx-2" @click="importIncomeCategoryDialog = true" v-can="'auth-roles-create'" />
                     <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
             </Toolbar>
@@ -188,9 +188,9 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 <Column field="guard_name" header="Guard Name" sortable class="capitalize"></Column>
                 <Column :exportable="false">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editRole(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger mr-2" @click="confirmDeleteRole(slotProps.data)" />
-                        <Button icon="pi pi-lock" outlined rounded severity="info" as="router-link" :to="{ name: 'role-permissions', params: { id: encryptData(slotProps.data.id) } }" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editRole(slotProps.data)" v-can="'auth-roles-update'" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger mr-2" @click="confirmDeleteRole(slotProps.data)" v-can="'auth-roles-delete'" />
+                        <Button icon="pi pi-lock" outlined rounded severity="info" as="router-link" :to="{ name: 'role-permissions', params: { id: encryptData(slotProps.data.id) } }" v-can="'auth-roles-permissions'" />
                     </template>
                 </Column>
             </DataTable>

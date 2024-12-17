@@ -253,9 +253,9 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <div class="card">
             <Toolbar class="mb-6">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
+                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" v-can="'data-my wallets-create'" />
                     <Button label="Top Up" icon="pi pi-upload" severity="secondary" class="mx-2" @click="topupDialog = true" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedMyWallets || !selectedMyWallets.length" />
+                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedMyWallets || !selectedMyWallets.length" v-can="'data-my wallets-delete'" />
                     <Button label="Transaction History" icon="pi pi-list" severity="secondary" class="ml-2" as="router-link" :to="{ name: 'myWalletTransactions' }" />
                 </template>
 
@@ -308,8 +308,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 </Column>
                 <Column :exportable="false" style="min-width: 12rem">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editMyWallet(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteWallet(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editMyWallet(slotProps.data)" v-can="'data-my wallets-update'" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteWallet(slotProps.data)" v-can="'data-my wallets-delete'" />
                     </template>
                 </Column>
             </DataTable>

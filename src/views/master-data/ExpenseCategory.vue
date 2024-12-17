@@ -171,12 +171,12 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
         <div class="card">
             <Toolbar class="mb-6">
                 <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedExpenseCategories || !selectedExpenseCategories.length" />
+                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" v-can="'master data-expense categories-create'" />
+                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedExpenseCategories || !selectedExpenseCategories.length" v-can="'master data-expense categories-delete'" />
                 </template>
 
                 <template #end>
-                    <Button label="Import" icon="pi pi-download" severity="secondary mx-2" @click="importExpenseCategoryDialog = true" />
+                    <Button label="Import" icon="pi pi-download" severity="secondary mx-2" @click="importExpenseCategoryDialog = true" v-can="'master data-expense categories-create'" />
                     <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
             </Toolbar>
@@ -210,8 +210,8 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
                 <Column field="description" header="Description" sortable></Column>
                 <Column :exportable="false">
                     <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editExpenseCategory(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteExpenseCategory(slotProps.data)" />
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editExpenseCategory(slotProps.data)" v-can="'master data-expense categories-update'" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteExpenseCategory(slotProps.data)" v-can="'master data-expense categories-delete'" />
                     </template>
                 </Column>
             </DataTable>

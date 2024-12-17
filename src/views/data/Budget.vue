@@ -1,5 +1,6 @@
 <script setup>
 import { BudgetServices } from '@/service/data/BudgetService';
+import { usePermissionsStore } from '@/store/permissions';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watch } from 'vue';
@@ -7,6 +8,7 @@ import { onMounted, ref, watch } from 'vue';
 const budgets = ref();
 const total_budget = ref(0);
 const isLoading = ref(false);
+const permissionStore = usePermissionsStore();
 
 const fetchBudgets = async () => {
     try {
@@ -128,7 +130,7 @@ const breadcrumbHome = ref({ icon: 'pi pi-home', to: '/' });
             <Column field="name" header="Category" sortable style="min-width: 16rem"></Column>
             <Column field="budget.amount" header="Amount" sortable style="min-width: 8rem">
                 <template #body="slotProps">
-                    <InputNumber v-model="slotProps.data.budget.amount" @keyup.enter="updateBudget(slotProps.data)" mode="currency" currency="IDR" />
+                    <InputNumber v-model="slotProps.data.budget.amount" @keyup.enter="updateBudget(slotProps.data)" :disabled="permissionStore.can('data-budget-update') ? false : true" mode="currency" currency="IDR" />
                 </template>
             </Column>
         </DataTable>

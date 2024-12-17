@@ -39,7 +39,7 @@ const router = createRouter({
                         {
                             path: 'budget',
                             name: 'budget',
-                            component: () => import('@/views/data/budget/Budget.vue')
+                            component: () => import('@/views/data/Budget.vue')
                         }
                     ]
                 },
@@ -98,7 +98,7 @@ const router = createRouter({
     ]
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const publicPages = ['/auth/login', '/auth/register', '/auth/error', '/auth/access'];
     const authRequired = !publicPages.includes(to.path);
     const loggedIn = localStorage.getItem('user');
