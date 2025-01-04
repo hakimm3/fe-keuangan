@@ -17,7 +17,10 @@ const expenseByWallet = ref(null);
 const expenseStreamByMonth = ref(null);
 const incomeStreamByMonth = ref(null);
 const total_expense_this_month = ref(0);
+const percentage_expense_vs_last_month = ref(0);
 const total_income_this_month = ref(0);
+const percentage_income_vs_last_month = ref(0);
+const percentage_balance_vs_last_month = ref(0);
 const total_money_in_all_wallet = ref(0);
 
 const year = ref({ label: new Date().getFullYear() });
@@ -31,7 +34,15 @@ onMounted(() => {
 async function getDashboardData(params) {
     dashboardData.value = await DashboardService.getDashboardData(params);
     total_expense_this_month.value = dashboardData.value.data.total_expense_this_month;
+    percentage_expense_vs_last_month.value = getPercentageCompare(dashboardData.value.data.total_expense_this_month, dashboardData.value.data.total_expense_last_month);
+
     total_income_this_month.value = dashboardData.value.data.total_income_this_month;
+    percentage_income_vs_last_month.value = getPercentageCompare(dashboardData.value.data.total_income_this_month, dashboardData.value.data.total_income_last_month);
+
+    percentage_balance_vs_last_month.value = getPercentageCompare(
+        dashboardData.value.data.total_income_this_month - dashboardData.value.data.total_expense_this_month,
+        dashboardData.value.data.total_income_last_month - dashboardData.value.data.total_expense_last_month
+    );
     total_money_in_all_wallet.value = dashboardData.value.data.total_money_in_all_wallet;
 
     expenseStreamByMonth.value = convertToStackedChartDataWithBudget(dashboardData.value.data.expense_stream_by_month);
@@ -248,6 +259,10 @@ const formatCurrency = (value) => {
     return value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
 };
 
+const getPercentageCompare = (current, last) => {
+    return parseFloat((((current - last) / last) * 100).toFixed(2));
+};
+
 function convertToPieData(data) {
     const labels = data.map((item) => item.wallet);
     const totals = data.map((item) => item.total);
@@ -319,8 +334,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                         <i class="pi pi-shopping-cart text-blue-500 !text-xl"></i>
                     </div>
                 </div>
-                <span class="text-primary font-medium"> + 43% </span>
-                <span class="text-muted-color">compare to last month</span>
+                <span class="font-medium" :class="percentage_expense_vs_last_month < 0 ? 'text-primary' : 'text-red-500'"> {{ percentage_expense_vs_last_month < 0 ? percentage_expense_vs_last_month : '+' + percentage_expense_vs_last_month }}% </span>
+                <span class="text-muted-color"> compare to last month</span>
             </div>
         </div>
         <div class="col-span-12 lg:col-span-6 xl:col-span-3">
@@ -334,8 +349,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                         <i class="pi pi-dollar text-orange-500 !text-xl"></i>
                     </div>
                 </div>
-                <span class="text-red-500 font-medium">%52- </span>
-                <span class="text-muted-color">compare to last month</span>
+                <span class="font-medium" :class="percentage_income_vs_last_month < 0 ? 'text-red-500' : 'text-primary'"> {{ percentage_income_vs_last_month < 0 ? percentage_income_vs_last_month : '+ ' + percentage_income_vs_last_month }}% </span>
+                <span class="text-muted-color"> compare to last month</span>
             </div>
         </div>
         <div class="col-span-12 lg:col-span-6 xl:col-span-3">
@@ -349,8 +364,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                         <i class="pi pi-users text-cyan-500 !text-xl"></i>
                     </div>
                 </div>
-                <span class="text-primary font-medium">520 </span>
-                <span class="text-muted-color">newly registered</span>
+                <span class="font-medium" :class="percentage_balance_vs_last_month < 0 ? 'text-red-500' : 'text-primary'"> {{ percentage_balance_vs_last_month < 0 ? percentage_balance_vs_last_month : '+' + percentage_balance_vs_last_month }}% </span>
+                <span class="text-muted-color"> compare to last month</span>
             </div>
         </div>
         <div class="col-span-12 lg:col-span-6 xl:col-span-3">
@@ -364,8 +379,6 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                         <i class="pi pi-comment text-purple-500 !text-xl"></i>
                     </div>
                 </div>
-                <span class="text-primary font-medium">85 </span>
-                <span class="text-muted-color">responded</span>
             </div>
         </div>
 
