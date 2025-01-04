@@ -20,13 +20,16 @@ const total_expense_this_month = ref(0);
 const total_income_this_month = ref(0);
 const total_money_in_all_wallet = ref(0);
 
+const year = ref({ label: new Date().getFullYear() });
+const options_years = [{ label: 2022 }, { label: 2023 }, { label: 2024 }, { label: 2025 }, { label: 2026 }];
+
 onMounted(() => {
     chartOptions.value = setChartOptions();
-    getDashboardData();
+    getDashboardData({});
 });
 
-async function getDashboardData() {
-    dashboardData.value = await DashboardService.getDashboardData();
+async function getDashboardData(params) {
+    dashboardData.value = await DashboardService.getDashboardData(params);
     total_expense_this_month.value = dashboardData.value.data.total_expense_this_month;
     total_income_this_month.value = dashboardData.value.data.total_income_this_month;
     total_money_in_all_wallet.value = dashboardData.value.data.total_money_in_all_wallet;
@@ -289,9 +292,17 @@ const pieOptions = {
     }
 };
 
+function filterByDate() {
+    getDashboardData({
+        year: year.value.label
+    });
+}
+
 watch([getPrimary, getSurface, isDarkTheme], () => {
     chartOptions.value = setChartOptions();
-    dashboardData.value = getDashboardData();
+    dashboardData.value = getDashboardData({
+        year: year.value.label
+    });
 });
 </script>
 
@@ -355,6 +366,13 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <span class="text-primary font-medium">85 </span>
                 <span class="text-muted-color">responded</span>
+            </div>
+        </div>
+
+        <div class="col-span-12 xl:col-span-12">
+            <div class="card">
+                <div class="font-semibold text-xl mb-4">Year</div>
+                <Select id="wallet" v-model="year" :options="options_years" optionLabel="label" placeholder="Select year" v-on:change="filterByDate" fluid></Select>
             </div>
         </div>
 

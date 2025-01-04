@@ -4,12 +4,13 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_BASE_URL + 'dashboard';
 
 export const DashboardService = {
-    getDashboardData: async () => {
+    getDashboardData: async (params = {}) => {
         try {
             const response = await axios.get(`${API_URL}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
+                },
+                params: params
             });
             return response.data;
         } catch (error) {
