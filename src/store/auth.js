@@ -41,9 +41,30 @@ export const authStore = defineStore('auth', () => {
         router.push({ name: 'login' });
     };
 
+    const register = async (email, password) => {
+        try {
+            const response = await axios.post(`${API_URL}register`, {
+                email: email,
+                password: password
+            });
+            if (response.status === 200) {
+                router.push({ name: 'login' });
+            }
+            return response.data;
+        } catch (error) {
+            if (error.response.status === 422) {
+                isValidationError.value = true;
+                validationErrors.value = error.response.data.message;
+            } else {
+                throw error;
+            }
+        }
+    };
+
     return {
         login,
         logout,
+        register,
         isValidationError,
         validationErrors
     };
