@@ -41,13 +41,14 @@ export const authStore = defineStore('auth', () => {
         router.push({ name: 'login' });
     };
 
-    const register = async (email, password) => {
+    const register = async (name, email, password) => {
         try {
             const response = await axios.post(`${API_URL}register`, {
+                name: name,
                 email: email,
                 password: password
             });
-            if (response.status === 200) {
+            if (response.status === 201) {
                 router.push({ name: 'login' });
             }
             return response.data;
